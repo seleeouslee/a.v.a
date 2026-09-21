@@ -331,14 +331,14 @@
     </div>
 
     <div id="comm-window" class="window draggable" style="transform: none !important;">
-        <div class="window-header">A.V.A. COMM LINK <span style="font-size:0.7rem; opacity:0.8;">(ADVANCE VIRTUAL ASSISTANT)</span></div>
+        <div class="window-header">A.V.A. COMM LINK <span style="font-size:0.7rem; opacity:0.8;">(WAKE WORD: "AVA")</span></div>
         <div class="window-content center-content">
             <div id="voice-visualizer" class="arc-reactor">
                 <div class="core"></div>
             </div>
             <div id="comm-status" style="min-height: 40px; display: flex; align-items: center; justify-content: center; text-transform: uppercase;">STANDBY</div>
             
-            <input type="text" id="manual-command-input" placeholder="Speak or type command..." style="margin-bottom: 5px; text-align: center;">
+            <input type="text" id="manual-command-input" placeholder="Say 'Ava' or type command..." style="margin-bottom: 5px; text-align: center;">
             <button id="start-comm-btn" class="action-btn">ACTIVATE VOICE COMM</button>
         </div>
     </div>
@@ -740,13 +740,14 @@
             }
         }
 
-        // --- A.V.A. SPEECH-TO-TEXT & GROQ LAMA CONVERSATION ---
+        // --- A.V.A. WAKE-WORD & SPEECH ENGINE ---
         const startCommBtn = document.getElementById('start-comm-btn');
         const commStatus = document.getElementById('comm-status');
         const visualizer = document.getElementById('voice-visualizer');
         const manualCmdInput = document.getElementById('manual-command-input');
 
         let commActive = false;
+        let waitingForWakeWord = true;
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
 
@@ -791,13 +792,6 @@
             window.speechSynthesis.onvoiceschanged = () => {};
         }
 
-        const greetings = [
-            "Online. What are we up to today?",
-            "Comm link established. Awaiting directives.",
-            "Systems green. How can I assist you?",
-            "Hello. Ready to tackle today's itinerary."
-        ];
-        
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             recognition.continuous = false;
@@ -805,7 +799,11 @@
             recognition.lang = 'en-US';
             
             recognition.onstart = () => {
-                commStatus.innerText = "LISTENING... (SPEAK NOW)";
+                if (waitingForWakeWord) {
+                    commStatus.innerText = "LISTENING FOR WAKE WORD ('AVA')...";
+                } else {
+                    commStatus.innerText = "LISTENING FOR DIRECTIVE...";
+                }
                 commStatus.classList.add('highlight');
                 visualizer.classList.add('active');
             };
@@ -819,7 +817,24 @@
                 commStatus.innerText = `HEARING: "${transcript}"`;
                 
                 if (event.results[event.results.length - 1].isFinal) {
-                    processAvaCommand(transcript);
+                    const textLower = transcript.toLowerCase();
+                    
+                    if (waitingForWakeWord) {
+                        if (textLower.includes("ava") || textLower.includes("a.v.a.")) {
+                            waitingForWakeWord = false;
+                            commStatus.innerText = "A.V.A. ONLINE // SPEAK DIRECTIVE";
+                            speak("Online. What do you need?", () => {
+                                try { recognition.start(); } catch(e) {}
+                            });
+                        } else {
+                            // Reset back to listening for wake word if she wasn't addressed
+                            try { recognition.start(); } catch(e) {}
+                        }
+                    } else {
+                        // Wake word detected already, now process the full command/question
+                        waitingForWakeWord = true; // reset back to sleep/wake-word mode after processing
+                        processAvaCommand(transcript);
+                    }
                 }
             };
             
@@ -844,14 +859,13 @@
             if (!commActive) {
                 if (recognition) {
                     commActive = true;
+                    waitingForWakeWord = true;
                     startCommBtn.innerText = "DEACTIVATE COMM";
-                    
-                    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-                    commStatus.innerText = randomGreeting;
+                    commStatus.innerText = "LISTENING FOR 'AVA'...";
                     commStatus.classList.add('highlight');
                     visualizer.classList.add('active');
                     
-                    speak(randomGreeting, () => {
+                    speak("Voice comm active. Say Ava to begin.", () => {
                         try { recognition.start(); } catch(e) {}
                     });
                 } else {
@@ -1029,7 +1043,7 @@
 
                 const dmRes = `https://api.dailymotion.com/videos?search=${encodeURIComponent(query)}&limit=1&fields=id,title`;
                 const dmFetch = await fetch(dmRes);
-                const dmData = await dmFetch.json();
+                const dmData =@ -dmFetch.json();
                 
                 if (dmData.list && dmData.list.length > 0) {
                     const videoId = dmData.list[0].id;
