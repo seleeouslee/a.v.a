@@ -60,8 +60,8 @@
             flex-direction: column;
             transition: box-shadow 0.5s ease, border-color 0.5s ease, background 0.5s ease;
             z-index: 10;
-            resize: both; /* Native resize support */
-            overflow: hidden; /* Contains content during resize */
+            resize: both;
+            overflow: hidden;
         }
 
         .window-header {
@@ -147,7 +147,6 @@
             transition: accent-color 0.5s ease;
         }
 
-        /* Buttons, Inputs, Selects */
         input[type="password"], input[type="text"], select {
             background: rgba(0, 0, 0, 0.5);
             border: 1px solid var(--hud-cyan);
@@ -184,7 +183,6 @@
             box-shadow: 0 0 15px var(--hud-cyan);
         }
 
-        /* Arc Reactor Comm Visualizer */
         .center-content {
             align-items: center;
             text-align: center;
@@ -228,7 +226,6 @@
             to { transform: scale(1.1); opacity: 1; }
         }
 
-        /* Initial Window Placements */
         #api-config { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 350px; z-index: 999; display: none; }
         #env-window { top: 150px; left: 20px; width: 320px; height: 350px; }
         #itinerary-window { top: 20px; right: 20px; width: 320px; height: 350px; }
@@ -246,13 +243,11 @@
     </style>
 </head>
 <body>
-    <!-- AI Thinking Processes Canvas -->
     <canvas id="ai-brain-canvas"></canvas>
     
     <div class="hud-background"></div>
     <div class="shortcut-hint">CTRL + A + M to open settings</div>
 
-    <!-- Hidden System Config Window -->
     <div id="api-config" class="window draggable">
         <div class="window-header">SYSTEM PREFERENCES</div>
         <div class="window-content">
@@ -278,7 +273,6 @@
         </div>
     </div>
 
-    <!-- Environmental Window -->
     <div id="env-window" class="window draggable">
         <div class="window-header">ENVIRONMENTAL DIAGNOSTICS</div>
         <div class="window-content">
@@ -296,7 +290,6 @@
         </div>
     </div>
 
-    <!-- Itinerary & Notion Window -->
     <div id="itinerary-window" class="window draggable">
         <div class="window-header">ITINERARY & OBJECTIVES</div>
         <div class="window-content">
@@ -309,7 +302,6 @@
         </div>
     </div>
 
-    <!-- Visual Recon / Media Uplink Window -->
     <div id="media-window" class="window draggable">
         <div class="window-header">VISUAL RECON // MEDIA UPLINK</div>
         <div class="window-content">
@@ -321,7 +313,6 @@
         </div>
     </div>
 
-    <!-- Comm Link Window -->
     <div id="comm-window" class="window draggable" style="transform: none !important;">
         <div class="window-header">A.V.A. COMM LINK <span style="font-size:0.7rem; opacity:0.8;">(ADVANCE VIRTUAL ASSISTANT)</span></div>
         <div class="window-content center-content">
@@ -336,7 +327,6 @@
     </div>
 
     <script>
-        // --- 0. AI THINKING PROCESSES BACKGROUND ---
         const canvas = document.getElementById('ai-brain-canvas');
         const ctx = canvas.getContext('2d');
         
@@ -386,7 +376,6 @@
             }
         });
 
-        // --- 0.5 SHORTCUT LISTENER (CTRL + A + M) ---
         const keysPressed = new Set();
         document.addEventListener('keydown', (e) => {
             keysPressed.add(e.key.toLowerCase());
@@ -405,7 +394,6 @@
             keysPressed.delete(e.key.toLowerCase());
         });
 
-        // --- 1. THEME & SETTINGS LOGIC ---
         const themeSelect = document.getElementById('theme-select');
         const savedTheme = localStorage.getItem('stark_theme') || 'cyan';
         themeSelect.value = savedTheme;
@@ -425,11 +413,10 @@
             }
         }
 
-        // --- 2. DRAGGABLE, SCREEN & WINDOW-TO-WINDOW SNAPPING LOGIC ---
         const draggables = document.querySelectorAll('.draggable');
         let highestZIndex = 11;
-        const SCREEN_SNAP = 30; // Distance to snap to screen edges
-        const WIN_SNAP = 15;     // Distance to snap window edges to other windows
+        const SCREEN_SNAP = 30;
+        const WIN_SNAP = 15;
 
         draggables.forEach(windowEl => {
             const header = windowEl.querySelector('.window-header');
@@ -467,31 +454,25 @@
                 const currentWidth = rect.width;
                 const currentHeight = rect.height;
 
-                // 1. Screen Edge Snapping
                 if (newX < SCREEN_SNAP) newX = 0;
                 else if (newX + currentWidth > winWidth - SCREEN_SNAP) newX = winWidth - currentWidth;
 
                 if (newY < SCREEN_SNAP) newY = 0;
                 else if (newY + currentHeight > winHeight - SCREEN_SNAP) newY = winHeight - currentHeight;
 
-                // 2. Window-to-Window Snapping
                 draggables.forEach(otherEl => {
                     if (otherEl === windowEl) return;
                     const oRect = otherEl.getBoundingClientRect();
 
-                    // Snap Left of dragged window to Right of other window
                     if (Math.abs(newX - oRect.right) < WIN_SNAP && newY + currentHeight > oRect.top && newY < oRect.bottom) {
                         newX = oRect.right;
                     }
-                    // Snap Right of dragged window to Left of other window
                     if (Math.abs((newX + currentWidth) - oRect.left) < WIN_SNAP && newY + currentHeight > oRect.top && newY < oRect.bottom) {
                         newX = oRect.left - currentWidth;
                     }
-                    // Snap Top of dragged window to Bottom of other window
                     if (Math.abs(newY - oRect.bottom) < WIN_SNAP && newX + currentWidth > oRect.left && newX < oRect.right) {
                         newY = oRect.bottom;
                     }
-                    // Snap Bottom of dragged window to Top of other window
                     if (Math.abs((newY + currentHeight) - oRect.top) < WIN_SNAP && newX + currentWidth > oRect.left && newX < oRect.right) {
                         newY = oRect.top - currentHeight;
                     }
@@ -504,7 +485,6 @@
             document.addEventListener('mouseup', () => isDragging = false);
         });
 
-        // --- 3. LIVE CLOCK LOGIC ---
         function updateTime() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
@@ -513,7 +493,6 @@
         setInterval(updateTime, 1000);
         updateTime();
 
-        // --- 4. GEOLOCATION & WEATHER LOGIC ---
         const manualLocInput = document.getElementById('manual-location-input');
         manualLocInput.value = localStorage.getItem('stark_location') || '';
 
@@ -582,7 +561,6 @@
         }
         initSensors();
 
-        // --- 5. SYSTEM CREDENTIALS & INITIALIZATION ---
         const notionSecretInput = document.getElementById('notion-secret-input');
         const notionDbInput = document.getElementById('notion-db-input');
         const saveKeyBtn = document.getElementById('save-key-btn');
@@ -613,7 +591,6 @@
             apiConfigWindow.style.display = 'none';
         });
 
-        // --- 6. NOTION DATABASE LOGIC ---
         document.getElementById('auth-notion-btn').addEventListener('click', async () => {
             if (!NOTION_SECRET || !NOTION_DB) {
                 alert("Please enter your Notion credentials in the System Preferences (CTRL+A+M).");
@@ -673,7 +650,6 @@
             }
         }
 
-        // --- 7. A.V.A. COMM LINK (VOICE PARSING, FEMALE TTS & MEDIA) ---
         const startCommBtn = document.getElementById('start-comm-btn');
         const commStatus = document.getElementById('comm-status');
         const visualizer = document.getElementById('voice-visualizer');
@@ -723,6 +699,7 @@
             recognition = new SpeechRecognition();
             recognition.continuous = false;
             recognition.interimResults = false;
+            recognition.lang = 'en-US';
             
             recognition.onstart = () => {
                 commStatus.innerText = "LISTENING... (SPEAK COMMAND)";
@@ -736,7 +713,11 @@
             };
             
             recognition.onerror = (event) => {
-                commStatus.innerText = `COMM ERROR: ${event.error.toUpperCase()}`;
+                if (event.error === 'network') {
+                    commStatus.innerText = "NETWORK ERROR (USE TEXT BOX BELOW)";
+                } else {
+                    commStatus.innerText = `COMM ERROR: ${event.error.toUpperCase()}`;
+                }
                 deactivateComm();
             };
             
@@ -776,7 +757,9 @@
                     alert("Voice recognition is not supported in your browser. Please use the command text box.");
                 }
             } else {
-                if (recognition) recognition.stop();
+                if (recognition) {
+                    try { recognition.stop(); } catch(e) {}
+                }
                 deactivateComm();
             }
         });
@@ -845,8 +828,9 @@
                 imageGrid.style.gridTemplateColumns = '1fr 1fr';
                 imageGrid.style.gap = '10px';
 
-                const dmRes = await fetch(`https://api.dailymotion.com/videos?search=${encodeURIComponent(query)}&limit=1&fields=id,title`);
-                const dmData = await dmRes.json();
+                const dmRes = `https://api.dailymotion.com/videos?search=${encodeURIComponent(query)}&limit=1&fields=id,title`;
+                const dmFetch = await fetch(dmRes);
+                const dmData = await dmFetch.json();
                 
                 if (dmData.list && dmData.list.length > 0) {
                     const videoId = dmData.list[0].id;
