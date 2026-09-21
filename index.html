@@ -231,6 +231,7 @@
         #itinerary-window { top: 20px; right: 20px; width: 320px; height: 350px; }
         #comm-window { bottom: 30px; left: 50%; transform: translateX(-50%); width: 340px; height: 260px; }
         #media-window { top: 150px; left: 360px; width: 380px; height: 420px; display: none; } 
+        #browser-window { top: 150px; right: 360px; width: 420px; height: 450px; display: none; }
         
         .shortcut-hint {
             position: absolute;
@@ -313,6 +314,20 @@
             <hr class="separator">
             <h3 style="margin-bottom: 0;">IMAGE DATABANKS</h3>
             <div id="media-images" style="min-height: 100px; text-align: center; font-style: italic;">AWAITING QUERY...</div>
+        </div>
+    </div>
+
+    <!-- Browser Uplink Window -->
+    <div id="browser-window" class="window draggable">
+        <div class="window-header">SECURE SURFING // BROWSER UPLINK</div>
+        <div class="window-content" style="gap: 8px; flex-grow: 1;">
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="browser-url-input" placeholder="Enter URL (e.g. https://en.wikipedia.org)">
+                <button id="browser-go-btn" class="action-btn" style="padding: 8px 12px;">GO</button>
+            </div>
+            <div style="flex-grow: 1; border: 1px solid var(--hud-cyan); background: #000; border-radius: 3px; overflow: hidden; min-height: 280px; display: flex;">
+                <iframe id="browser-iframe" src="https://en.wikipedia.org" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>
+            </div>
         </div>
     </div>
 
@@ -495,6 +510,36 @@
         }
         setInterval(updateTime, 1000);
         updateTime();
+
+        // --- BROWSER UPLINK LOGIC ---
+        const browserUrlInput = document.getElementById('browser-url-input');
+        const browserGoBtn = document.getElementById('browser-go-btn');
+        const browserIframe = document.getElementById('browser-iframe');
+        const browserWindow = document.getElementById('browser-window');
+
+        browserUrlInput.value = "https://en.wikipedia.org";
+
+        function navigateBrowser(urlOrQuery) {
+            let targetUrl = urlOrQuery.trim();
+            if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+                // If not a full URL, treat as search/Wikipedia query
+                targetUrl = `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(targetUrl)}`;
+            }
+            browserUrlInput.value = targetUrl;
+            browserIframe.src = targetUrl;
+            browserWindow.style.display = 'flex';
+            browserWindow.style.zIndex = ++highestZIndex;
+        }
+
+        browserGoBtn.addEventListener('click', () => {
+            navigateBrowser(browserUrlInput.value);
+        });
+
+        browserUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                navigateBrowser(browserUrlInput.value);
+            }
+        });
 
         const manualLocInput = document.getElementById('manual-location-input');
         manualLocInput.value = localStorage.getItem('stark_location') || '';
@@ -799,7 +844,29 @@
             commStatus.innerText = `PROCESSING...`;
             commStatus.classList.add('highlight');
             
-            // 1. Check for media search commands
+            // 1. Check for Browser commands
+            if (command.includes("open browser") || command.includes("launch browser")) {
+                browserWindow.style.display = 'flex';
+                browserWindow.style.zIndex = ++highestZIndex;
+                speak("Browser uplink established.");
+                commStatus.innerText = "BROWSER ACTIVE";
+                return;
+            } else if (command.includes("close browser") || command.includes("hide browser")) {
+                browserWindow.style.display = 'none';
+                speak("Browser uplink closed.");
+                commStatus.innerText = "BROWSER CLOSED";
+                return;
+            } else if (command.includes("browse to") || command.includes("open website")) {
+                let site = command.replace(/(browse to|open website)/g, "").trim();
+                if (site) {
+                    navigateBrowser(site);
+                    speak(`Navigating to ${site}.`);
+                    commStatus.innerText = `BROWSING: ${site}`;
+                    return;
+                }
+            }
+
+            // 2. Check for media search commands
             if (command.includes("show me") || command.includes("pull up") || command.includes("search for")) {
                 let query = command.replace(/(show me|pull up images of|pull up a video of|pull up|search for)/g, "").trim();
                 if(query) {
@@ -815,14 +882,14 @@
                 return;
             }
 
-            // 2. Check for Gemini API key
+            // 3. Check for Gemini API key
             if (!GEMINI_API_KEY) {
                 commStatus.innerText = "API KEY REQUIRED (CTRL+A+M)";
                 speak("Gemini API key is missing. Please add it in system preferences.");
                 return;
             }
 
-            // 3. Send to Gemini API for normal conversational chat
+            // 4. Send to Gemini API for normal conversational chat
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
