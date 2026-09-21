@@ -658,7 +658,7 @@
             }
         }
 
-        // --- A.V.A. SPEECH-TO-TEXT & GEMINI CONVERSATION ---
+        // --- A.V.A. CONTINUOUS SPEECH-TO-TEXT & GEMINI CONVERSATION ---
         const startCommBtn = document.getElementById('start-comm-btn');
         const commStatus = document.getElementById('comm-status');
         const visualizer = document.getElementById('voice-visualizer');
@@ -675,7 +675,8 @@
             }
             window.speechSynthesis.cancel();
             
-            if (commActive && recognition) {
+            // Temporarily stop mic while she speaks to prevent echo feedback loop
+            if (recognition) {
                 try { recognition.stop(); } catch(e) {}
             }
 
@@ -695,6 +696,7 @@
 
             utterance.onend = () => {
                 if (callback) callback();
+                // Automatically resume listening after she finishes speaking
                 if (commActive && recognition) {
                     setTimeout(() => {
                         try { recognition.start(); } catch(e) {}
@@ -729,25 +731,30 @@
             };
             
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    transcript += event.results[i][0].transcript;
+                }
                 manualCmdInput.value = transcript;
                 commStatus.innerText = `HEARING: "${transcript}"`;
                 
-                if (event.results[0].isFinal) {
+                if (event.results[event.results.length - 1].isFinal) {
                     processAvaCommand(transcript);
                 }
             };
             
             recognition.onerror = (event) => {
-                if (event.error !== 'aborted') {
+                if (event.error !== 'aborted' && event.error !== 'no-speech') {
                     commStatus.innerText = `COMM ERROR: ${event.error.toUpperCase()}`;
-                    deactivateComm();
                 }
             };
             
             recognition.onend = () => {
-                if (!commActive) {
-                    deactivateComm();
+                // Automatically restart listening loop if comm link is active
+                if (commActive && !window.speechSynthesis.speaking) {
+                    try {
+                        recognition.start();
+                    } catch(e) {}
                 }
             };
         } else {
@@ -758,10 +765,8 @@
             commActive = false;
             startCommBtn.innerText = "ACTIVATE VOICE COMM";
             visualizer.classList.remove('active');
-            if (commStatus.innerText.includes("HEARING") || commStatus.innerText.includes("LISTENING")) {
-                commStatus.innerText = "STANDBY";
-                commStatus.classList.remove('highlight');
-            }
+            commStatus.innerText = "STANDBY";
+            commStatus.classList.remove('highlight');
         }
 
         startCommBtn.addEventListener('click', () => {
@@ -818,7 +823,7 @@
                 return;
             }
 
-            // 2. Fallback to Gemini API for normal conversational chat
+            // 2. Fallback to Gemini AI for normal conversational chat
             if (!GEMINI_API_KEY) {
                 speak("Gemini API key is missing. Please add it in system preferences.");
                 commStatus.innerText = "API KEY REQUIRED (CTRL+A+M)";
