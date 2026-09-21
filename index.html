@@ -226,7 +226,7 @@
             to { transform: scale(1.1); opacity: 1; }
         }
 
-        #api-config { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 350px; z-index: 999; display: none; }
+        #api-config { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; z-index: 999; display: none; }
         #env-window { top: 150px; left: 20px; width: 320px; height: 350px; }
         #itinerary-window { top: 20px; right: 20px; width: 320px; height: 350px; }
         #comm-window { bottom: 30px; left: 50%; transform: translateX(-50%); width: 340px; height: 260px; }
@@ -264,9 +264,17 @@
 
             <hr class="separator">
 
-            <label>Groq API Key (Free Llama 3.3):</label>
-            <input type="password" id="api-key-input" placeholder="gsk_...">
+            <label>Local LLM Endpoint (Ollama / LM Studio):</label>
+            <input type="text" id="llm-endpoint-input" placeholder="http://localhost:11434/v1/chat/completions">
             
+            <label>Local Model Name:</label>
+            <input type="text" id="llm-model-input" placeholder="llama3">
+
+            <label>Local API Key (Optional):</label>
+            <input type="password" id="api-key-input" placeholder="Not required for Ollama">
+            
+            <hr class="separator">
+
             <label>Notion Internal Secret (Tasks):</label>
             <input type="password" id="notion-secret-input" placeholder="secret_ABC123...">
             
@@ -331,14 +339,14 @@
     </div>
 
     <div id="comm-window" class="window draggable" style="transform: none !important;">
-        <div class="window-header">A.V.A. COMM LINK <span style="font-size:0.7rem; opacity:0.8;">(WAKE WORD: "AVA")</span></div>
+        <div class="window-header">A.V.A. COMM LINK <span style="font-size:0.7rem; opacity:0.8;">(WAKE WORD REQUIRED)</span></div>
         <div class="window-content center-content">
             <div id="voice-visualizer" class="arc-reactor">
                 <div class="core"></div>
             </div>
             <div id="comm-status" style="min-height: 40px; display: flex; align-items: center; justify-content: center; text-transform: uppercase;">STANDBY</div>
             
-            <input type="text" id="manual-command-input" placeholder="Say 'Ava' or type command..." style="margin-bottom: 5px; text-align: center;">
+            <input type="text" id="manual-command-input" placeholder="Type or activate voice..." style="margin-bottom: 5px; text-align: center;">
             <button id="start-comm-btn" class="action-btn">ACTIVATE VOICE COMM</button>
         </div>
     </div>
@@ -646,29 +654,39 @@
         }
         initSensors();
 
+        const llmEndpointInput = document.getElementById('llm-endpoint-input');
+        const llmModelInput = document.getElementById('llm-model-input');
         const apiKeyInput = document.getElementById('api-key-input');
         const notionSecretInput = document.getElementById('notion-secret-input');
         const notionDbInput = document.getElementById('notion-db-input');
         const saveKeyBtn = document.getElementById('save-key-btn');
         const apiConfigWindow = document.getElementById('api-config');
 
-        let GROQ_API_KEY = localStorage.getItem('stark_groq_key') || '';
+        let LLM_ENDPOINT = localStorage.getItem('stark_llm_endpoint') || 'http://localhost:11434/v1/chat/completions';
+        let LLM_MODEL = localStorage.getItem('stark_llm_model') || 'llama3';
+        let LLM_API_KEY = localStorage.getItem('stark_llm_key') || '';
         let NOTION_SECRET = localStorage.getItem('stark_notion_secret') || '';
         let NOTION_DB = localStorage.getItem('stark_notion_db') || '';
 
-        apiKeyInput.value = GROQ_API_KEY;
+        llmEndpointInput.value = LLM_ENDPOINT;
+        llmModelInput.value = LLM_MODEL;
+        apiKeyInput.value = LLM_API_KEY;
         notionSecretInput.value = NOTION_SECRET;
         notionDbInput.value = NOTION_DB;
 
         saveKeyBtn.addEventListener('click', () => {
-            GROQ_API_KEY = apiKeyInput.value;
+            LLM_ENDPOINT = llmEndpointInput.value || 'http://localhost:11434/v1/chat/completions';
+            LLM_MODEL = llmModelInput.value || 'llama3';
+            LLM_API_KEY = apiKeyInput.value;
             NOTION_SECRET = notionSecretInput.value;
             NOTION_DB = notionDbInput.value;
             
             const selectedTheme = themeSelect.value;
             const selectedLocation = manualLocInput.value;
 
-            if (GROQ_API_KEY) localStorage.setItem('stark_groq_key', GROQ_API_KEY);
+            localStorage.setItem('stark_llm_endpoint', LLM_ENDPOINT);
+            localStorage.setItem('stark_llm_model', LLM_MODEL);
+            if (LLM_API_KEY) localStorage.setItem('stark_llm_key', LLM_API_KEY);
             if (NOTION_SECRET) localStorage.setItem('stark_notion_secret', NOTION_SECRET);
             if (NOTION_DB) localStorage.setItem('stark_notion_db', NOTION_DB);
             
@@ -740,14 +758,13 @@
             }
         }
 
-        // --- A.V.A. WAKE-WORD & SPEECH ENGINE ---
+        // --- A.V.A. STERN WAKE-WORD VOICE ENGINE ---
         const startCommBtn = document.getElementById('start-comm-btn');
         const commStatus = document.getElementById('comm-status');
         const visualizer = document.getElementById('voice-visualizer');
         const manualCmdInput = document.getElementById('manual-command-input');
 
         let commActive = false;
-        let waitingForWakeWord = true;
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
 
@@ -799,11 +816,7 @@
             recognition.lang = 'en-US';
             
             recognition.onstart = () => {
-                if (waitingForWakeWord) {
-                    commStatus.innerText = "LISTENING FOR WAKE WORD ('AVA')...";
-                } else {
-                    commStatus.innerText = "LISTENING FOR DIRECTIVE...";
-                }
+                commStatus.innerText = "LISTENING (SAY 'AVA' TO COMMAND)...";
                 commStatus.classList.add('highlight');
                 visualizer.classList.add('active');
             };
@@ -819,21 +832,23 @@
                 if (event.results[event.results.length - 1].isFinal) {
                     const textLower = transcript.toLowerCase();
                     
-                    if (waitingForWakeWord) {
-                        if (textLower.includes("ava") || textLower.includes("a.v.a.")) {
-                            waitingForWakeWord = false;
-                            commStatus.innerText = "A.V.A. ONLINE // SPEAK DIRECTIVE";
-                            speak("Online. What do you need?", () => {
-                                try { recognition.start(); } catch(e) {}
-                            });
+                    // STRICT GATE: Must contain wake word 'ava'
+                    if (textLower.includes("ava") || textLower.includes("a.v.a.")) {
+                        // Extract everything after 'ava' as the command
+                        let commandPart = transcript.replace(/ava|a\.v\.a\./gi, "").trim();
+                        
+                        if (commandPart.length > 0) {
+                            processAvaCommand(commandPart);
                         } else {
-                            // Reset back to listening for wake word if she wasn't addressed
-                            try { recognition.start(); } catch(e) {}
+                            speak("Online. What do you need?");
+                            commStatus.innerText = "ONLINE // AWAITING DIRECTIVE";
                         }
                     } else {
-                        // Wake word detected already, now process the full command/question
-                        waitingForWakeWord = true; // reset back to sleep/wake-word mode after processing
-                        processAvaCommand(transcript);
+                        // IGNORE speech completely if wake word is missing
+                        commStatus.innerText = "IGNORED (NO WAKE WORD 'AVA')";
+                        setTimeout(() => {
+                            if (commActive) commStatus.innerText = "LISTENING (SAY 'AVA' TO COMMAND)...";
+                        }, 1500);
                     }
                 }
             };
@@ -859,13 +874,12 @@
             if (!commActive) {
                 if (recognition) {
                     commActive = true;
-                    waitingForWakeWord = true;
                     startCommBtn.innerText = "DEACTIVATE COMM";
-                    commStatus.innerText = "LISTENING FOR 'AVA'...";
+                    commStatus.innerText = "COMM ACTIVE // SAY 'AVA'";
                     commStatus.classList.add('highlight');
                     visualizer.classList.add('active');
                     
-                    speak("Voice comm active. Say Ava to begin.", () => {
+                    speak("Voice comm active. Say Ava followed by your command.", () => {
                         try { recognition.start(); } catch(e) {}
                     });
                 } else {
@@ -895,7 +909,7 @@
             commStatus.innerText = `PROCESSING...`;
             commStatus.classList.add('highlight');
             
-            // 1. Check for Window Quadrant Grid / Main Master Display Commands
+            // 1. Window Quadrant Grid / Main Master Display Commands
             if (command.includes("move") || command.includes("snap") || command.includes("put")) {
                 let targetWin = null;
                 if (command.includes("browser")) targetWin = document.getElementById('browser-window');
@@ -925,7 +939,7 @@
                 }
             }
 
-            // 2. Check for Browser commands
+            // 2. Browser commands
             if (command.includes("open browser") || command.includes("launch browser")) {
                 browserWindow.style.display = 'flex';
                 browserWindow.style.zIndex = ++highestZIndex;
@@ -947,7 +961,7 @@
                 }
             }
 
-            // 3. Check for media search commands
+            // 3. Media search commands
             if (command.includes("show me") || command.includes("pull up") || command.includes("search for")) {
                 let query = command.replace(/(show me|pull up images of|pull up a video of|pull up|search for)/g, "").trim();
                 if(query) {
@@ -963,29 +977,28 @@
                 return;
             }
 
-            // 4. Check for Groq API key
-            if (!GROQ_API_KEY) {
-                commStatus.innerText = "API KEY REQUIRED (CTRL+A+M)";
-                speak("Groq API key is missing. Please add it in system preferences.");
+            // 4. Fallback if no LLM configured
+            if (!LLM_ENDPOINT) {
+                commStatus.innerText = "LOCAL COMMAND EXECUTED";
+                speak("Command executed locally.");
                 return;
             }
 
-            // 5. Send to Groq API (Llama 3.3 70B Versatile)
-            const targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
-
+            // 5. Send to Local LLM / Ollama
             try {
-                const response = await fetch(targetUrl, {
+                const headers = { 'Content-Type': 'application/json' };
+                if (LLM_API_KEY) headers['Authorization'] = `Bearer ${LLM_API_KEY}`;
+
+                const response = await fetch(LLM_ENDPOINT, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${GROQ_API_KEY}`
-                    },
+                    headers: headers,
                     body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
+                        model: LLM_MODEL || 'llama3',
                         messages: [
                             { role: "system", content: "You are A.V.A., an advanced virtual assistant inspired by J.A.R.V.I.S. from Iron Man. Keep your responses concise (under 2 sentences), sharp, and helpful." },
                             { role: "user", content: text }
-                        ]
+                        ],
+                        stream: false
                     })
                 });
 
@@ -996,15 +1009,14 @@
                     commStatus.innerText = aiReply.toUpperCase();
                     speak(aiReply);
                 } else {
-                    console.error("Groq API response structure error:", data);
-                    const errorMsg = data.error?.message || "Mainframe synchronization failed.";
-                    commStatus.innerText = "API ERROR";
-                    speak(errorMsg);
+                    console.error("Local LLM response error:", data);
+                    commStatus.innerText = "LOCAL LLM ERROR";
+                    speak("Mainframe communication error.");
                 }
             } catch (err) {
-                console.error("Groq AI error:", err);
-                commStatus.innerText = "AI CONNECTION ERROR";
-                speak("Communication link error with mainframe.");
+                console.error("Local LLM connection error:", err);
+                commStatus.innerText = "OFFLINE MODE";
+                speak("Local server unreachable.");
             }
         }
 
@@ -1043,7 +1055,7 @@
 
                 const dmRes = `https://api.dailymotion.com/videos?search=${encodeURIComponent(query)}&limit=1&fields=id,title`;
                 const dmFetch = await fetch(dmRes);
-                const dmData =@ -dmFetch.json();
+                const dmData = await dmFetch.json();
                 
                 if (dmData.list && dmData.list.length > 0) {
                     const videoId = dmData.list[0].id;
