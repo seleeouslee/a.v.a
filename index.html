@@ -658,7 +658,7 @@
             }
         }
 
-        // --- A.V.A. CONTINUOUS SPEECH-TO-TEXT & GEMINI CONVERSATION ---
+        // --- A.V.A. SPEECH-TO-TEXT & GEMINI CONVERSATION ---
         const startCommBtn = document.getElementById('start-comm-btn');
         const commStatus = document.getElementById('comm-status');
         const visualizer = document.getElementById('voice-visualizer');
@@ -675,7 +675,6 @@
             }
             window.speechSynthesis.cancel();
             
-            // Temporarily stop mic while she speaks to prevent echo feedback loop
             if (recognition) {
                 try { recognition.stop(); } catch(e) {}
             }
@@ -696,7 +695,6 @@
 
             utterance.onend = () => {
                 if (callback) callback();
-                // Automatically resume listening after she finishes speaking
                 if (commActive && recognition) {
                     setTimeout(() => {
                         try { recognition.start(); } catch(e) {}
@@ -750,7 +748,6 @@
             };
             
             recognition.onend = () => {
-                // Automatically restart listening loop if comm link is active
                 if (commActive && !window.speechSynthesis.speaking) {
                     try {
                         recognition.start();
@@ -759,14 +756,6 @@
             };
         } else {
             commStatus.innerText = "SPEECH-TO-TEXT NOT SUPPORTED.";
-        }
-
-        function deactivateComm() {
-            commActive = false;
-            startCommBtn.innerText = "ACTIVATE VOICE COMM";
-            visualizer.classList.remove('active');
-            commStatus.innerText = "STANDBY";
-            commStatus.classList.remove('highlight');
         }
 
         startCommBtn.addEventListener('click', () => {
@@ -791,7 +780,10 @@
                 if (recognition) {
                     try { recognition.stop(); } catch(e) {}
                 }
-                deactivateComm();
+                commStatus.innerText = "STANDBY";
+                commStatus.classList.remove('highlight');
+                startCommBtn.innerText = "ACTIVATE VOICE COMM";
+                visualizer.classList.remove('active');
             }
         });
 
@@ -823,13 +815,14 @@
                 return;
             }
 
-            // 2. Fallback to Gemini AI for normal conversational chat
+            // 2. Check for Gemini API key
             if (!GEMINI_API_KEY) {
-                speak("Gemini API key is missing. Please add it in system preferences.");
                 commStatus.innerText = "API KEY REQUIRED (CTRL+A+M)";
+                speak("Gemini API key is missing. Please add it in system preferences.");
                 return;
             }
 
+            // 3. Send to Gemini API for normal conversational chat
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
@@ -844,13 +837,16 @@
                 });
 
                 const data = await response.json();
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                
+                if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
                     const aiReply = data.candidates[0].content.parts[0].text.trim();
                     commStatus.innerText = aiReply.toUpperCase();
                     speak(aiReply);
                 } else {
-                    commStatus.innerText = "A.V.A. READY";
-                    speak("I am online and listening.");
+                    console.error("Gemini API response structure error:", data);
+                    const errorMsg = data.error?.message || "Mainframe synchronization failed.";
+                    commStatus.innerText = "API ERROR";
+                    speak(errorMsg);
                 }
             } catch (err) {
                 console.error("Gemini AI error:", err);
