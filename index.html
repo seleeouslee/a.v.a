@@ -956,12 +956,11 @@
                 return;
             }
 
-            // 5. Send to Gemini API via CORS Proxy with 2.0-flash model
-            const proxyUrl = 'https://corsproxy.io/?';
-            const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+            // 5. Send directly to Gemini API using gemini-3.5-flash
+            const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
             try {
-                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+                const response = await fetch(targetUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
