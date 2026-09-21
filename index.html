@@ -264,7 +264,7 @@
 
             <hr class="separator">
 
-            <label>Groq API Key (Free Llama 3.1):</label>
+            <label>Groq API Key (Free Llama 3.3):</label>
             <input type="password" id="api-key-input" placeholder="gsk_...">
             
             <label>Notion Internal Secret (Tasks):</label>
@@ -956,7 +956,7 @@
                 return;
             }
 
-            // 5. Send to Groq API (Llama 3.1 8B Instant)
+            // 5. Send to Groq API (Llama 3.3 70B Versatile)
             const targetUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
             try {
@@ -967,7 +967,7 @@
                         'Authorization': `Bearer ${GROQ_API_KEY}`
                     },
                     body: JSON.stringify({
-                        model: "llama-3.1-8b-instant",
+                        model: "llama-3.3-70b-versatile",
                         messages: [
                             { role: "system", content: "You are A.V.A., an advanced virtual assistant inspired by J.A.R.V.I.S. from Iron Man. Keep your responses concise (under 2 sentences), sharp, and helpful." },
                             { role: "user", content: text }
