@@ -321,7 +321,7 @@
             </div>
             <div id="comm-status" style="min-height: 40px; display: flex; align-items: center; justify-content: center; text-transform: uppercase;">STANDBY</div>
             
-            <input type="text" id="manual-command-input" placeholder="Command override (e.g. 'Show me Iron Man')" style="margin-bottom: 5px; text-align: center;">
+            <input type="text" id="manual-command-input" placeholder="Type command (e.g. 'Show me Iron Man')" style="margin-bottom: 5px; text-align: center;">
             <button id="start-comm-btn" class="action-btn">ACTIVATE VOICE COMM</button>
         </div>
     </div>
@@ -714,7 +714,9 @@
             
             recognition.onerror = (event) => {
                 if (event.error === 'network') {
-                    commStatus.innerText = "NETWORK ERROR (USE TEXT BOX BELOW)";
+                    commStatus.innerText = "VOICE CLOUD OFFLINE. USE TEXT BOX BELOW.";
+                    speak("Voice cloud offline. Switching to manual command input.");
+                    manualCmdInput.focus();
                 } else {
                     commStatus.innerText = `COMM ERROR: ${event.error.toUpperCase()}`;
                 }
