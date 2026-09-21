@@ -834,7 +834,6 @@
                     
                     // STRICT GATE: Must contain wake word 'ava'
                     if (textLower.includes("ava") || textLower.includes("a.v.a.")) {
-                        // Extract everything after 'ava' as the command
                         let commandPart = transcript.replace(/ava|a\.v\.a\./gi, "").trim();
                         
                         if (commandPart.length > 0) {
@@ -844,7 +843,6 @@
                             commStatus.innerText = "ONLINE // AWAITING DIRECTIVE";
                         }
                     } else {
-                        // IGNORE speech completely if wake word is missing
                         commStatus.innerText = "IGNORED (NO WAKE WORD 'AVA')";
                         setTimeout(() => {
                             if (commActive) commStatus.innerText = "LISTENING (SAY 'AVA' TO COMMAND)...";
