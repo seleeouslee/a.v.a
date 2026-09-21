@@ -321,7 +321,7 @@
             </div>
             <div id="comm-status" style="min-height: 40px; display: flex; align-items: center; justify-content: center; text-transform: uppercase;">STANDBY</div>
             
-            <input type="text" id="manual-command-input" placeholder="Type command (e.g. 'Show me Iron Man')" style="margin-bottom: 5px; text-align: center;">
+            <input type="text" id="manual-command-input" placeholder="Speak or type command..." style="margin-bottom: 5px; text-align: center;">
             <button id="start-comm-btn" class="action-btn">ACTIVATE VOICE COMM</button>
         </div>
     </div>
@@ -656,6 +656,7 @@
         const manualCmdInput = document.getElementById('manual-command-input');
 
         let commActive = false;
+        let silenceTimer = null;
         
         function speak(text) {
             if (!window.speechSynthesis) return;
@@ -697,25 +698,52 @@
         
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
+            recognition.continuous = true;
+            recognition.interimResults = true;
             recognition.lang = 'en-US';
             
             recognition.onstart = () => {
-                commStatus.innerText = "LISTENING... (SPEAK COMMAND)";
+                commStatus.innerText = "LISTENING... (SPEAK FREELY)";
                 commStatus.classList.add('highlight');
                 visualizer.classList.add('active');
             };
             
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                processAvaCommand(transcript);
+                clearTimeout(silenceTimer);
+                
+                let interim = '';
+                let final = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        final += event.results[i][0].transcript;
+                    } else {
+                        interim += event.results[i][0].transcript;
+                    }
+                }
+                
+                const currentText = final || interim;
+                if (currentText) {
+                    manualCmdInput.value = currentText;
+                    commStatus.innerText = `HEARING: "${currentText}"`;
+                }
+                
+                // 3-second silence timeout before auto-submitting
+                silenceTimer = setTimeout(() => {
+                    const textToSend = manualCmdInput.value.trim();
+                    if (textToSend && commActive) {
+                        try { recognition.stop(); } catch(e) {}
+                        processAvaCommand(textToSend);
+                        manualCmdInput.value = '';
+                    }
+                }, 3000);
             };
             
             recognition.onerror = (event) => {
+                clearTimeout(silenceTimer);
                 if (event.error === 'network') {
-                    commStatus.innerText = "VOICE CLOUD OFFLINE. USE TEXT BOX BELOW.";
-                    speak("Voice cloud offline. Switching to manual command input.");
+                    commStatus.innerText = "VOICE CLOUD OFFLINE. USE TEXT BOX.";
+                    speak("Voice cloud offline. Please type your command.");
                     manualCmdInput.focus();
                 } else {
                     commStatus.innerText = `COMM ERROR: ${event.error.toUpperCase()}`;
@@ -724,7 +752,12 @@
             };
             
             recognition.onend = () => {
-                deactivateComm();
+                clearTimeout(silenceTimer);
+                if (commActive) {
+                    try { recognition.start(); } catch(e) {}
+                } else {
+                    deactivateComm();
+                }
             };
         } else {
             commStatus.innerText = "VOICE NOT SUPPORTED. USE TEXT OVERRIDE.";
@@ -732,9 +765,10 @@
 
         function deactivateComm() {
             commActive = false;
+            clearTimeout(silenceTimer);
             startCommBtn.innerText = "ACTIVATE VOICE COMM";
             visualizer.classList.remove('active');
-            if (commStatus.innerText.includes("LISTENING")) {
+            if (commStatus.innerText.includes("HEARING") || commStatus.innerText.includes("LISTENING")) {
                 commStatus.innerText = "STANDBY";
                 commStatus.classList.remove('highlight');
             }
@@ -768,6 +802,7 @@
 
         manualCmdInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && manualCmdInput.value.trim() !== "") {
+                clearTimeout(silenceTimer);
                 processAvaCommand(manualCmdInput.value);
                 manualCmdInput.value = "";
             }
@@ -775,7 +810,7 @@
 
         function processAvaCommand(text) {
             const command = text.toLowerCase();
-            commStatus.innerText = `RECEIVED: "${command}"`;
+            commStatus.innerText = `PROCESSING: "${command}"`;
             commStatus.classList.add('highlight');
             
             if (command.includes("show me") || command.includes("pull up") || command.includes("search for")) {
