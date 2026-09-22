@@ -5,6 +5,7 @@ async function processAvaCommand(text) {
     const command = commandText.toLowerCase();
     commStatus.innerText = `PROCESSING...`;
     commStatus.classList.add('highlight');
+    if (checkRepeatCommand(command)) return;
 
     // Schedule questions must use STM data, never model-generated arrival guesses.
     const transitHandled = handleTransitCommand(commandText);
