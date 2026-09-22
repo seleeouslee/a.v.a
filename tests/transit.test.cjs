@@ -71,6 +71,7 @@ test('transit questions are handled before the model or media search', async () 
     let received;
     const app = vm.createContext({
         commStatus:{classList:{add(){}}},
+        checkRepeatCommand() { return false; },
         handleTransitCommand(text) { received=text; return Promise.resolve(true); },
         requestAiReply() { throw Error('Must not invent a schedule'); }
     });

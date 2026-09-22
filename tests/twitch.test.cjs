@@ -23,7 +23,7 @@ function setup(protocol = 'https:', hostname = 'seleeouslee.github.io') {
         moveWindowToQuadrant(target, position) { target.position = position; },
         requestAiReply() { throw new Error('Twitch command fell through to the model'); }
     });
-    for (const file of ['twitch.js', 'commands.js', 'voice.js']) {
+    for (const file of ['repeat.js', 'twitch.js', 'commands.js', 'voice.js']) {
         vm.runInContext(fs.readFileSync(path.join(__dirname, '../js', file), 'utf8'), context);
     }
     const run = code => vm.runInContext(code, context);

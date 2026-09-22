@@ -11,12 +11,13 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 let recognition = null;
 
 function speak(text, callback) {
+    // Keep the last response available even when this browser has no speech output.
+    recordAvaMemory(text);
     if (!window.speechSynthesis) {
         if (callback) callback();
         return;
     }
     window.speechSynthesis.cancel();
- recordAvaMemory(text);
     
     if (recognition) {
         try { recognition.stop(); } catch(e) {}
