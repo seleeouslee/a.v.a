@@ -103,6 +103,22 @@
         </div>
     </div>
 
+    <div id="twitch-window" class="window draggable">
+        <div class="window-header">TWITCH // LIVE STREAM</div>
+        <div class="window-content twitch-content">
+            <form id="twitch-channel-form" class="browser-toolbar">
+                <input type="text" id="twitch-channel-input" aria-label="Twitch channel" placeholder="Channel name or twitch.tv/channel" autocomplete="off">
+                <button type="submit" class="action-btn">WATCH</button>
+                <button type="button" id="twitch-close-btn" class="action-btn">CLOSE</button>
+            </form>
+            <p id="twitch-status" role="status">Enter a channel name to watch its stream and chat.</p>
+            <div id="twitch-streams" class="twitch-streams" hidden>
+                <iframe id="twitch-player" title="Twitch stream" src="about:blank" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                <iframe id="twitch-chat" title="Twitch chat" src="about:blank"></iframe>
+            </div>
+        </div>
+    </div>
+
     <div id="comm-window" class="comm-window-position window draggable">
         <div class="window-header">A.V.A. COMM LINK <span class="wake-word-hint">(WAKE WORD REQUIRED)</span></div>
         <div class="window-content center-content">
@@ -126,6 +142,7 @@
     <script src="./js/settings.js"></script>
     <script src="./js/notion.js"></script>
     <script src="./js/media.js"></script>
+    <script src="./js/twitch.js"></script>
     <script src="./js/llm.js"></script>
     <script src="./js/commands.js"></script>
     <script src="./js/voice.js"></script>

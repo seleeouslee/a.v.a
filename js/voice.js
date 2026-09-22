@@ -75,8 +75,8 @@ if (SpeechRecognition) {
             const textLower = transcript.toLowerCase();
 
             // STRICT GATE: Must contain wake word 'ava'
-            if (textLower.includes("ava") || textLower.includes("a.v.a.")) {
-                let commandPart = transcript.replace(/ava|a\.v\.a\./gi, "").trim();
+            if (/\b(?:a\.v\.a\.|ava\b)/i.test(textLower)) {
+                let commandPart = transcript.replace(/\b(?:a\.v\.a\.|ava\b)[\s,:-]*/i, "").trim();
 
                 if (commandPart.length > 0) {
                     processAvaCommand(commandPart);

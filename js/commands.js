@@ -1,14 +1,31 @@
 // Routes typed and spoken commands to windows, browser, media, or the model. Uses voice.js for replies.
 
 async function processAvaCommand(text) {
-    const command = text.toLowerCase();
+    const commandText = text.trim().replace(/^(?:a\.v\.a\.|ava\b)[\s,:-]*/i, '');
+    const command = commandText.toLowerCase();
     commStatus.innerText = `PROCESSING...`;
     commStatus.classList.add('highlight');
+
+    // Handle Twitch before generic commands (channel names can contain "move" or "close").
+    const twitchCommand = commandText.match(/^(?:open|launch|watch)(?:\s+browser)?\s+twitch(?:\s+channel)?(?:\s+(.+))?$/i);
+    if (twitchCommand) {
+        const reply = openTwitch((twitchCommand[1] || '').replace(/[.!?]+$/, ''));
+        commStatus.innerText = reply;
+        speak(reply);
+        return;
+    }
+    if (/^(?:close|hide)\s+twitch(?:\s+(?:panel|channel))?[.!]?$/i.test(commandText)) {
+        closeTwitch();
+        commStatus.innerText = 'TWITCH CLOSED';
+        speak('Twitch panel closed.');
+        return;
+    }
 
     // 1. Window Quadrant Grid / Main Master Display Commands
     if (command.includes("move") || command.includes("snap") || command.includes("put")) {
         let targetWin = null;
-        if (command.includes("browser")) targetWin = document.getElementById('browser-window');
+        if (command.includes("twitch")) targetWin = document.getElementById('twitch-window');
+        else if (command.includes("browser")) targetWin = document.getElementById('browser-window');
         else if (command.includes("media") || command.includes("recon")) targetWin = document.getElementById('media-window');
         else if (command.includes("env") || command.includes("weather") || command.includes("diagnostic")) targetWin = document.getElementById('env-window');
         else if (command.includes("itinerary") || command.includes("task") || command.includes("objective")) targetWin = document.getElementById('itinerary-window');
