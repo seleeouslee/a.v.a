@@ -35,7 +35,7 @@ function drawAiStream() {
     }
 }
 
-setInterval(drawAiStream, 45);
+//setInterval(drawAiStream, 45);
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
