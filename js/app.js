@@ -1,60 +1,91 @@
-// Notion task synchronization. Uses credentials from settings.js.
+// app.js
 
-document.getElementById('auth-notion-btn').addEventListener('click', async () => {
-    if (!NOTION_SECRET || !NOTION_DB) {
-        alert("Please enter your Notion credentials in the System Preferences (CTRL+A+M).");
-        return;
-    }
-    await fetchNotionData();
-});
+const taskInput = document.getElementById('taskInput');
+const addTaskBtn = document.getElementById('addTaskBtn');
+const taskList = document.getElementById('taskList');
 
-async function fetchNotionData() {
-    const syncBtn = document.getElementById('auth-notion-btn');
-    const listEl = document.getElementById('schedule-list');
+// 1. Load tasks from localStorage when the page loads
+// If there's nothing saved, start with an empty array []
+let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
 
-    syncBtn.innerText = "SYNCING...";
-    listEl.innerHTML = '<li>Accessing mainframe...</li>';
+// 2. Function to save our tasks array to localStorage
+function saveTasks() {
+    // localStorage only stores strings, so we convert our array to a JSON string
+    localStorage.setItem('myTasks', JSON.stringify(tasks));
+}
 
-    const proxyUrl = 'https://corsproxy.io/?';
-    const targetUrl = `https://api.notion.com/v1/databases/${NOTION_DB}/query`;
+// 3. Function to draw all tasks on the screen
+function renderTasks() {
+    // Clear the current list in the HTML
+    taskList.innerHTML = '';
+    
+    // Loop through our array of tasks and create HTML for each one
+    tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        
+        // If the task is marked completed in our data, add the CSS class
+        if (task.completed) {
+            li.classList.add('completed');
+        }
 
-    try {
-        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${NOTION_SECRET}`,
-                'Notion-Version': '2022-06-28',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({})
+        const span = document.createElement('span');
+        span.textContent = task.text;
+        
+        // Toggle completion status
+        span.addEventListener('click', () => {
+            // Flip the boolean (true to false, or false to true)
+            tasks[index].completed = !tasks[index].completed; 
+            saveTasks();  // Save the change
+            renderTasks(); // Redraw the list to show the strikethrough
         });
 
-        const data = await response.json();
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.className = 'delete-btn';
+        
+        // Delete task
+        deleteBtn.addEventListener('click', () => {
+            // Remove 1 item from the array at this specific index
+            tasks.splice(index, 1); 
+            saveTasks();   // Save the change
+            renderTasks(); // Redraw the list
+        });
 
-        if (data.results) {
-            syncBtn.innerText = "NOTION SYNCED";
-            syncBtn.classList.add('highlight');
-            listEl.innerHTML = '';
-
-            data.results.forEach((page, index) => {
-                let taskName = "Unnamed Directive";
-                if (page.properties.Name && page.properties.Name.title.length > 0) {
-                    taskName = page.properties.Name.title[0].plain_text;
-                }
-
-                listEl.innerHTML += `
-                    <li>
-                        <input type="checkbox" id="ntn-task${index}">
-                        <label for="ntn-task${index}">${taskName}</label>
-                    </li>`;
-            });
-        } else {
-            listEl.innerHTML = `<li>Error: ${data.message || 'Unknown API error'}</li>`;
-            syncBtn.innerText = "SYNC FAILED";
-        }
-    } catch (err) {
-        console.error("Notion fetch error:", err);
-        listEl.innerHTML = '<li>CONNECTION ERROR. Check console.</li>';
-        syncBtn.innerText = "SYNC FAILED";
-    }
+        li.appendChild(span);
+        li.appendChild(deleteBtn);
+        taskList.appendChild(li);
+    });
 }
+
+// 4. Function to add a new task
+function addTask() {
+    const taskText = taskInput.value.trim();
+    
+    if (taskText === '') {
+        alert("Please enter a task!");
+        return; 
+    }
+
+    // Add a new task object to our array
+    tasks.push({
+        text: taskText,
+        completed: false
+    });
+
+    saveTasks();   // Save to localStorage
+    renderTasks(); // Redraw the list so the new task appears
+
+    taskInput.value = ''; // Clear the input field
+}
+
+// 5. Event Listeners
+addTaskBtn.addEventListener('click', addTask);
+
+taskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        addTask();
+    }
+});
+
+// 6. Initial Setup: Draw the tasks immediately when the script runs
+renderTasks();
