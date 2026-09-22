@@ -58,7 +58,7 @@ if (SpeechRecognition) {
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
-        commStatus.innerText = "LISTENING (SAY 'AVA' TO COMMAND)...";
+        commStatus.innerText = "LISTENING (SAY 'AVA' OR 'EVA')...";
         commStatus.classList.add('highlight');
         visualizer.classList.add('active');
     };
@@ -74,9 +74,9 @@ if (SpeechRecognition) {
         if (event.results[event.results.length - 1].isFinal) {
             const textLower = transcript.toLowerCase();
 
-            // STRICT GATE: Must contain wake word 'ava'
-            if (/\b(?:a\.v\.a\.|ava\b)/i.test(textLower)) {
-                let commandPart = transcript.replace(/\b(?:a\.v\.a\.|ava\b)[\s,:-]*/i, "").trim();
+            // Accept AVA and EVA, including their dotted spellings, as whole wake words.
+            if (/\b(?:[ae]\.v\.a\.|[ae]va\b)/i.test(textLower)) {
+                let commandPart = transcript.replace(/\b(?:[ae]\.v\.a\.|[ae]va\b)[\s,:-]*/i, "").trim();
 
                 if (commandPart.length > 0) {
                     processAvaCommand(commandPart);
@@ -85,9 +85,9 @@ if (SpeechRecognition) {
                     commStatus.innerText = "ONLINE // AWAITING DIRECTIVE";
                 }
             } else {
-                commStatus.innerText = "IGNORED (NO WAKE WORD 'AVA')";
+                commStatus.innerText = "IGNORED (SAY 'AVA' OR 'EVA')";
                 setTimeout(() => {
-                    if (commActive) commStatus.innerText = "LISTENING (SAY 'AVA' TO COMMAND)...";
+                    if (commActive) commStatus.innerText = "LISTENING (SAY 'AVA' OR 'EVA')...";
                 }, 1500);
             }
         }
@@ -115,11 +115,11 @@ startCommBtn.addEventListener('click', () => {
         if (recognition) {
             commActive = true;
             startCommBtn.innerText = "DEACTIVATE COMM";
-            commStatus.innerText = "COMM ACTIVE // SAY 'AVA'";
+            commStatus.innerText = "COMM ACTIVE // SAY 'AVA' OR 'EVA'";
             commStatus.classList.add('highlight');
             visualizer.classList.add('active');
 
-            speak("Voice comm active. Say Ava followed by your command.", () => {
+            speak("Voice comm active. Say Ava or Eva followed by your command.", () => {
                 try { recognition.start(); } catch(e) {}
             });
         } else {

@@ -42,6 +42,8 @@ Keep `index.html`, `css/`, and `js/` together at the root of the configured Page
 
 ### Twitch
 
+Voice commands accept **AVA** or **EVA** as the wake word (including `A.V.A.` and `E.V.A.`). Either prefix also works when typing commands.
+
 Type `open Twitch channel twitchdev` or say **Ava, open Twitch channel twitchdev** after activating voice. Replace `twitchdev` with the channel's login name. `open browser twitch twitchdev` also works. Use `open Twitch` to open the empty panel, enter a channel name or `https://www.twitch.tv/channel`, and select **WATCH**. Press Play inside the player to start playback.
 
 The panel is draggable and resizable. The stream and chat fill the panel side by side when its content is at least 700 pixels wide. In narrower panels, chat stacks below the stream and the content scrolls, keeping the video at Twitch's required minimum of 400 by 300 pixels. Resizing does not reload playback. `move Twitch top left` positions it; `close Twitch` or its **CLOSE** button unloads the stream and chat to stop playback. No Twitch API key is needed for these embeds.

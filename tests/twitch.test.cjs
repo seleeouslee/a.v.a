@@ -81,3 +81,15 @@ test('spoken wake word removal preserves ava inside channel names', () => {
     run(`recognition.onresult({resultIndex:0,results:[Object.assign([{transcript:'open Twitch avatar'}],{isFinal:true})]})`);
     assert.equal(new URL(element('twitch-player').src).searchParams.get('channel'), 'lavastream');
 });
+
+test('AVA and EVA aliases route typed and spoken commands without matching parts of words', async () => {
+    for (const alias of ['AVA', 'EVA', 'A.V.A.', 'E.V.A.']) {
+        const { element, run } = setup();
+        await run(`processAvaCommand('${alias}, open Twitch channel twitchdev')`);
+        assert.equal(new URL(element('twitch-player').src).searchParams.get('channel'), 'twitchdev');
+        run(`recognition.onresult({resultIndex:0,results:[Object.assign([{transcript:'${alias}, open Twitch channel evastream'}],{isFinal:true})]})`);
+        assert.equal(new URL(element('twitch-player').src).searchParams.get('channel'), 'evastream');
+        run(`recognition.onresult({resultIndex:0,results:[Object.assign([{transcript:'open Twitch evaluate'}],{isFinal:true})]})`);
+        assert.equal(new URL(element('twitch-player').src).searchParams.get('channel'), 'evastream');
+    }
+});

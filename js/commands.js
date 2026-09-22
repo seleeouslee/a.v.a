@@ -1,7 +1,7 @@
 // Routes typed and spoken commands to windows, browser, media, or the model. Uses voice.js for replies.
 
 async function processAvaCommand(text) {
-    const commandText = text.trim().replace(/^(?:a\.v\.a\.|ava\b)[\s,:-]*/i, '');
+    const commandText = text.trim().replace(/^(?:[ae]\.v\.a\.|[ae]va\b)[\s,:-]*/i, '');
     const command = commandText.toLowerCase();
     commStatus.innerText = `PROCESSING...`;
     commStatus.classList.add('highlight');
