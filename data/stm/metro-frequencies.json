@@ -1,0 +1,11 @@
+{
+  "checked": "2026-09-22",
+  "reviewBy": "2026-10-25",
+  "note": "Published typical frequency ranges during service hours, not next-train predictions. Peak periods: weekdays 07:00–09:00 and 16:00–18:00. Holidays and disruptions may differ.",
+  "lines": {
+    "1": {"peak": [3,5], "offpeak": [3,8], "weekend": [6,10], "source": "https://www.stm.info/fr/infos/reseaux/metro/ligne-1---verte"},
+    "2": {"peak": [2,6], "offpeak": [3,8], "weekend": [6,10], "source": "https://www.stm.info/fr/infos/reseaux/metro/ligne-2---orange"},
+    "4": {"peak": [4,5], "offpeak": [4,10], "weekend": [5,10], "source": "https://www.stm.info/fr/infos/reseaux/metro/ligne-4---jaune"},
+    "5": {"peak": [5,5], "offpeak": [5,10], "weekend": [8,10], "source": "https://www.stm.info/fr/infos/reseaux/metro/ligne-5---bleue"}
+  }
+}

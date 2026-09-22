@@ -6,6 +6,13 @@ async function processAvaCommand(text) {
     commStatus.innerText = `PROCESSING...`;
     commStatus.classList.add('highlight');
 
+    // Schedule questions must use STM data, never model-generated arrival guesses.
+    const transitHandled = handleTransitCommand(commandText);
+    if (transitHandled) {
+        await transitHandled;
+        return;
+    }
+
     // Handle Twitch before generic commands (channel names can contain "move" or "close").
     const twitchCommand = commandText.match(/^(?:open|launch|watch)(?:\s+browser)?\s+twitch(?:\s+channel)?(?:\s+(.+))?$/i);
     if (twitchCommand) {
@@ -24,7 +31,8 @@ async function processAvaCommand(text) {
     // 1. Window Quadrant Grid / Main Master Display Commands
     if (command.includes("move") || command.includes("snap") || command.includes("put")) {
         let targetWin = null;
-        if (command.includes("twitch")) targetWin = document.getElementById('twitch-window');
+        if (command.includes("stm") || command.includes("transit")) targetWin = document.getElementById('transit-window');
+        else if (command.includes("twitch")) targetWin = document.getElementById('twitch-window');
         else if (command.includes("browser")) targetWin = document.getElementById('browser-window');
         else if (command.includes("media") || command.includes("recon")) targetWin = document.getElementById('media-window');
         else if (command.includes("env") || command.includes("weather") || command.includes("diagnostic")) targetWin = document.getElementById('env-window');

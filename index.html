@@ -119,6 +119,29 @@
         </div>
     </div>
 
+    <div id="transit-window" class="window draggable">
+        <div class="window-header">STM // PUBLISHED SCHEDULES</div>
+        <div class="window-content">
+            <form id="transit-form" class="transit-form">
+                <label for="transit-mode">Transport</label>
+                <select id="transit-mode"><option value="bus">Bus</option><option value="metro">Metro</option></select>
+                <label for="transit-route">Bus route / metro line (number or colour)</label>
+                <input id="transit-route" type="text" placeholder="24, green, orange…">
+                <label for="transit-stop">Bus stop code / metro station</label>
+                <input id="transit-stop" type="text" placeholder="Five-digit stop code or Berri-UQAM">
+                <label for="transit-direction">Direction (metro terminus or bus direction)</label>
+                <input id="transit-direction" type="text" placeholder="Angrignon, east…">
+                <div class="browser-toolbar">
+                    <button class="action-btn" type="submit">CHECK SCHEDULE</button>
+                    <button class="action-btn" type="button" id="transit-close-btn">CLOSE</button>
+                </div>
+            </form>
+            <p id="transit-result" role="status">Specify the route, stop or station, and direction above.</p>
+            <a id="transit-source" href="https://www.stm.info/fr/a-propos/developpeurs" target="_blank" rel="noopener noreferrer">Source: Société de transport de Montréal (STM)</a>
+            <small>Published bus schedules and typical metro frequencies, not live arrivals. Adapted STM data, CC BY 4.0. A.V.A. is not affiliated with STM.</small>
+        </div>
+    </div>
+
     <div id="comm-window" class="comm-window-position window draggable">
         <div class="window-header">A.V.A. COMM LINK <span class="wake-word-hint">(WAKE WORD REQUIRED)</span></div>
         <div class="window-content center-content">
@@ -143,6 +166,8 @@
     <script src="./js/notion.js"></script>
     <script src="./js/media.js"></script>
     <script src="./js/twitch.js"></script>
+    <script src="./js/transit-schedule.js"></script>
+    <script src="./js/transit.js"></script>
     <script src="./js/llm.js"></script>
     <script src="./js/commands.js"></script>
     <script src="./js/voice.js"></script>

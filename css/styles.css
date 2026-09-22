@@ -228,7 +228,11 @@ select option {
 #api-config { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; z-index: 999; display: none; }
 #env-window { top: 150px; left: 20px; width: 320px; height: 350px; }
 #itinerary-window { top: 20px; right: 20px; width: 320px; height: 350px; }
-#comm-window { bottom: 30px; left: 50%; transform: translateX(-50%); width: 340px; height: 260px; }
+#comm-window { bottom: 30px; left: 50%; transform: translateX(-50%); width: 340px; height: 360px; min-height: 360px; }
+#transit-window { top: 40px; left: 30px; width: 440px; height: 620px; min-height: 400px; display: none; }
+.transit-form { display: flex; flex-direction: column; gap: 8px; }
+#transit-result { white-space: pre-line; line-height: 1.5; margin: 0; }
+#transit-source { color: var(--hud-cyan); }
 #media-window { top: 150px; left: 360px; width: 380px; height: 420px; display: none; }
 #browser-window { top: 150px; right: 360px; width: 420px; height: 450px; display: none; }
 

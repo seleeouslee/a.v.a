@@ -58,7 +58,7 @@ if (SpeechRecognition) {
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
-        commStatus.innerText = "LISTENING (SAY 'AVA' OR 'EVA')...";
+        commStatus.innerText = "LISTENING (SAY 'AVA')...";
         commStatus.classList.add('highlight');
         visualizer.classList.add('active');
     };
@@ -85,9 +85,9 @@ if (SpeechRecognition) {
                     commStatus.innerText = "ONLINE // AWAITING DIRECTIVE";
                 }
             } else {
-                commStatus.innerText = "IGNORED (SAY 'AVA' OR 'EVA')";
+                commStatus.innerText = "IGNORED (SAY 'AVA')";
                 setTimeout(() => {
-                    if (commActive) commStatus.innerText = "LISTENING (SAY 'AVA' OR 'EVA')...";
+                    if (commActive) commStatus.innerText = "LISTENING (SAY 'AVA')...";
                 }, 1500);
             }
         }
@@ -115,11 +115,11 @@ startCommBtn.addEventListener('click', () => {
         if (recognition) {
             commActive = true;
             startCommBtn.innerText = "DEACTIVATE COMM";
-            commStatus.innerText = "COMM ACTIVE // SAY 'AVA' OR 'EVA'";
+            commStatus.innerText = "COMM ACTIVE // SAY 'AVA'";
             commStatus.classList.add('highlight');
             visualizer.classList.add('active');
 
-            speak("Voice comm active. Say Ava or Eva followed by your command.", () => {
+            speak("Voice comm active. Say Ava followed by your command.", () => {
                 try { recognition.start(); } catch(e) {}
             });
         } else {

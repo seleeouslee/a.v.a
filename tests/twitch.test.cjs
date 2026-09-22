@@ -19,6 +19,7 @@ function setup(protocol = 'https:', hostname = 'seleeouslee.github.io') {
         document: { getElementById: element },
         window: { location: { protocol, hostname }, SpeechRecognition: class {} },
         highestZIndex: 11,
+        handleTransitCommand: () => false,
         moveWindowToQuadrant(target, position) { target.position = position; },
         requestAiReply() { throw new Error('Twitch command fell through to the model'); }
     });
