@@ -16,7 +16,8 @@ function speak(text, callback) {
         return;
     }
     window.speechSynthesis.cancel();
-
+ recordAvaMemory(text);
+    
     if (recognition) {
         try { recognition.stop(); } catch(e) {}
     }
@@ -119,7 +120,7 @@ startCommBtn.addEventListener('click', () => {
             commStatus.classList.add('highlight');
             visualizer.classList.add('active');
 
-            speak("Voice comm active. Say Ava followed by your command.", () => {
+            speak("Voice comm active.", () => {
                 try { recognition.start(); } catch(e) {}
             });
         } else {
