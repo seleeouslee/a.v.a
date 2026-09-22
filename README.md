@@ -7,8 +7,21 @@ A static website built with HTML, CSS, and JavaScript. No build step or package 
 ```text
 index.html       Page structure
 css/styles.css   Styles and layout
-js/app.js        Application behavior and integrations
+js/background.js Canvas character animation
+js/theme.js      Theme colors
+js/windows.js    Panel dragging, snapping, and placement
+js/clock.js      Clock and date
+js/browser.js    Embedded browser navigation
+js/weather.js    Location and weather
+js/settings.js   Preferences and saved configuration
+js/notion.js     Notion task synchronization
+js/media.js      Image and video search
+js/llm.js        AI model requests
+js/commands.js   Typed and spoken command routing
+js/voice.js      Speech recognition and spoken replies
 ```
+
+The scripts use classic browser script tags, so opening `index.html` directly still works. Keep the script order in `index.html`: feature helpers and shared settings load before voice input is initialized. Cross-feature dependencies are noted at the top of the relevant files. No bundler is required.
 
 ## Run locally
 
