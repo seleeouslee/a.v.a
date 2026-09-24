@@ -244,7 +244,7 @@ select option {
     opacity: 0.3;
     z-index: 5;
 }
-.version-tag {
+#version-tag {
     position: fixed;
     bottom: 10px;
     left: 10px;
