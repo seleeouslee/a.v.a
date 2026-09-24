@@ -368,7 +368,7 @@ select option {
     }
 }
 #version-tag {
-    position: absolute;
+    position: fixed;
     bottom: 10px;
     left: 10px;
     font-size: 0.8rem;
