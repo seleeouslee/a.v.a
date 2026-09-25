@@ -153,7 +153,23 @@
             </div>
         </div>
     </div>
+    
+    <div id="youtube-window" class="window draggable">
+        <div class="window-header">YOUTUBE // VIDEO UPLINK</div>
+        <div class="window-content youtube-content">
+            <form id="youtube-form" class="browser-toolbar">
+                <input type="text" id="youtube-input" aria-label="YouTube video" placeholder="Video link, video ID, or Shorts link" autocomplete="off">
+                <button type="submit" class="action-btn">PLAY</button>
+                <button type="button" id="youtube-close-btn" class="action-btn">CLOSE</button>
+            </form>
+            <p id="youtube-status" role="status">Enter a YouTube link or video ID.</p>
+            <div id="youtube-player-wrap" hidden>
+                <iframe id="youtube-player" title="YouTube video" src="about:blank" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
 
+  
     <div id="transit-window" class="window draggable">
         <div class="window-header">STM // PUBLISHED SCHEDULES</div>
         <div class="window-content">
@@ -210,6 +226,6 @@
     <script src="./js/features.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="./js/sleep.js"></script>
-
+    <script src="./js/youtube.js"></script>
 </body>
 </html>
