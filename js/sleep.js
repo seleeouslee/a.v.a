@@ -6,7 +6,7 @@
 (function () {
     'use strict';
 
-    var SLEEP_TIMEOUT_MS = 5 * 1000;
+    var SLEEP_TIMEOUT_MS = 150 * 1000;
     var STORAGE_KEY = 'stark_sleep_mode';
     var GLOBE_COLOR = 0x00f3ff; // match HUD cyan
 
