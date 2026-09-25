@@ -39,7 +39,93 @@ function stopListening(status = 'STANDBY') {
     visualizer.classList.remove('active');
 }
 
+// Strip markdown/symbols so they aren't read aloud as choppy pauses.
+function cleanForSpeech(text) {
+    return String(text || '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/[*_#>`~|]/g, '')
+        .replace(/&/g, ' and ')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+}
+
+// Split into sentences so long replies queue smoothly instead of one choppy block.
+function chunkSentences(text) {
+    const parts = text.match(/[^.!?]+[.!?]+["']?/g) || [];
+    const rest = text.slice(parts.join('').length).trim();
+    if (rest) parts.push(rest);
+    return parts.length ? parts : [text];
+}
+
+function getAvaVoices() {
+    return window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+}
+
+// Prefer natural/neural voices; fall back to any clear English voice.
+function pickAvaVoice() {
+    const voices = getAvaVoices();
+    if (!voices.length) return null;
+    const savedUri = localStorage.getItem('stark_tts_voice');
+    if (savedUri) {
+        const saved = voices.find(v => v.voiceURI === savedUri);
+        if (saved) return saved;
+    }
+    const prefs = [
+        v => /natural/i.test(v.name) && /^en/i.test(v.lang),
+        v => /google uk english female/i.test(v.name),
+        v => /google us english/i.test(v.name),
+        v => /samantha/i.test(v.name),
+        v => /zira|aria/i.test(v.name),
+        v => /female/i.test(v.name) && /^en/i.test(v.lang),
+        v => /^en[-_]us/i.test(v.lang),
+        v => /^en/i.test(v.lang),
+    ];
+    for (const test of prefs) {
+        const found = voices.find(test);
+        if (found) return found;
+    }
+    return voices[0];
+}
+
 function speak(text, callback) {
+    // Keep the last response available even when this browser has no speech output.
+    recordAvaMemory(text);
+    if (!window.speechSynthesis) {
+        if (callback) callback();
+        return;
+    }
+    const generation = ++speechGeneration;
+    replySpeaking = true;
+    window.speechSynthesis.cancel();
+
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+    }
+
+    const cleanText = cleanForSpeech(text) || text;
+    const voice = pickAvaVoice();
+    const sentences = chunkSentences(cleanText);
+
+    const finishSpeaking = () => {
+        if (generation !== speechGeneration) return;
+        replySpeaking = false;
+        if (callback) callback();
+        startListening();
+    };
+
+    sentences.forEach((sentence, i) => {
+        const utterance = new SpeechSynthesisUtterance(sentence);
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        if (voice) utterance.voice = voice;
+        if (i === sentences.length - 1) {
+            utterance.onend = finishSpeaking;
+            utterance.onerror = finishSpeaking;
+        }
+        window.speechSynthesis.speak(utterance);
+    });
+}
+
     // Keep the last response available even when this browser has no speech output.
     recordAvaMemory(text);
     if (!window.speechSynthesis) {
