@@ -101,3 +101,19 @@ async function processAvaCommand(text) {
 
     await requestAiReply(text);
 }
+// 4. Time command
+if (command.includes("time") && (command.includes("what") || command.includes("current"))) {
+    const now = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    speak(`It is currently ${now}.`);
+    commStatus.innerText = `TIME: ${now}`;
+    return;
+}
+// 5. Google search command
+const googleMatch = commandText.match(/^(?:google|search google for)\s+(.+)$/i);
+if (googleMatch) {
+    const query = googleMatch[1].trim();
+    window.open('https://www.google.com/search?q=' + encodeURIComponent(query), '_blank');
+    speak(`Searching Google for ${query}.`);
+    commStatus.innerText = `GOOGLING: ${query.toUpperCase()}`;
+    return;
+}
