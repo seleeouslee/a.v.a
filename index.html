@@ -14,6 +14,9 @@
     <div class="hud-background"></div>
     <div class="shortcut-hint">CTRL + A + M to open settings</div>
     <div id="version-tag">A.V.A. OS // v1.0.0 </div>
+    <div id="version-tag">A.V.A. OS // v1.0.0</div>
+    <div id="sleep-screen" aria-hidden="true"><canvas id="sleep-globe-canvas"></canvas></div>
+
         
     <div id="api-config" class="window draggable">
         <div class="window-header">SYSTEM PREFERENCES</div>
@@ -47,7 +50,13 @@
             <label>Notion Database ID:</label>
             <input type="text" id="notion-db-input" placeholder="Enter Database ID">
 
-                
+            <hr class="separator">
+
+<label class="toggle-row"><input type="checkbox" id="sleep-mode-toggle" checked> Sleep mode &mdash; wireframe globe after 60s idle</label>
+
+
+<button id="save-key-btn" class="action-btn">Save & Apply</button>
+    
             <button id="save-key-btn" class="action-btn">Save & Apply</button>
                 <!-- CHANGE THIS TO MAKE SURE WE ARE ON THE NEWEST BUILD? -->
             <div style="text-align: center; margin-top: 15px; font-size: 0.9rem; opacity: 0.5; letter-spacing: 2px;">
@@ -180,5 +189,8 @@
     <script src="./js/repeat.js"></script>
     <script src="./js/commands.js"></script>
     <script src="./js/voice.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="./js/sleep.js"></script>
+
 </body>
 </html>
