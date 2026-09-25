@@ -42,6 +42,8 @@ Keep `index.html`, `css/`, `js/`, and `data/` together at the root of the config
 
 ## Integrations
 
+Click **Explore features** at the top left to see the available features and open a panel. The menu includes AI chat and voice, weather and clock, Notion tasks, browser, image/video search, Twitch, STM schedules, settings, and replaying the last reply. Each entry explains what it does and any setup needed. Close the menu with **Close** or Escape. The Images & Videos panel has its own search box, so no voice command is required.
+
 ### Twitch
 
 Voice commands accept **AVA** as the wake word (including `A.V.A.` and `E.V.A.`). Either prefix also works when typing commands.
