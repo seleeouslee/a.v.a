@@ -13,6 +13,24 @@ async function processAvaCommand(text) {
         await transitHandled;
         return;
     }
+    // Good morning briefing: time + weather conditions + clothing recommendation
+if (/^good\s*morning[.!?]*$/.test(command)) {
+    const timeStr = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+    const condRaw = (document.getElementById('weather-desc').innerText || '').replace(/^COND:\s*/i, '').trim();
+    const clothingRaw = (document.getElementById('clothing-rec').innerText || '').replace(/^>\s*/, '').trim();
+
+    const weatherReady = condRaw && !/awaiting|loading|disconnected/i.test(condRaw);
+    const clothingReady = clothingRaw && !/analyzing/i.test(clothingRaw);
+
+    let reply = `Good morning, sir. It is currently ${timeStr}`;
+    reply += weatherReady ? ` and ${condRaw.toLowerCase()}.` : `. Weather sensors are still coming online.`;
+    if (clothingReady) reply += ` Clothing recommendation: ${clothingRaw}`;
+
+    commStatus.innerText = 'MORNING BRIEFING';
+    speak(reply);
+    return;
+}
 
     // Handle Twitch before generic commands (channel names can contain "move" or "close").
     const twitchCommand = commandText.replace(/[.!?]+$/, '').match(/^(?:open|launch|watch)(?:\s+browser)?\s+twitch(?:\s+channel)?(?:\s+(.+))?$/i);
