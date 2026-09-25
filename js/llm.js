@@ -10,8 +10,6 @@ function trimAvaHistory() {
 }
 
 async function requestAiReply(text) {
-
-async function requestAiReply(text) {
     // Fallback if no LLM configured
     if (!LLM_ENDPOINT) {
         commStatus.innerText = "LOCAL COMMAND EXECUTED";
@@ -20,9 +18,7 @@ async function requestAiReply(text) {
     }
 
     avaChatHistory.push({ role: "user", content: text });
-trimAvaHistory();
-
-
+    trimAvaHistory();
 
     // 5. Send to Local LLM / Ollama
     try {
@@ -35,10 +31,8 @@ trimAvaHistory();
             body: JSON.stringify({
                 model: LLM_MODEL || 'llama3',
                 messages: [
-            { role: "system", content: "You are A.V.A., an advanced virtual assistant inspired by J.A.R.V.I.S. from Iron Man. Keep your responses concise (under 2 sentences), sharp, and helpful." },
-            ...avaChatHistory
-],
-
+                    { role: "system", content: "You are A.V.A., an advanced virtual assistant inspired by J.A.R.V.I.S. from Iron Man. Keep your responses concise (under 2 sentences), sharp, and helpful." },
+                    ...avaChatHistory
                 ],
                 stream: false
             })
@@ -50,7 +44,6 @@ trimAvaHistory();
             const aiReply = data.choices[0].message.content.trim();
             avaChatHistory.push({ role: "assistant", content: aiReply });
             trimAvaHistory();
-
             commStatus.innerText = aiReply.toUpperCase();
             speak(aiReply);
         } else {
