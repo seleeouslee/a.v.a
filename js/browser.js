@@ -8,6 +8,11 @@ const browserWindow = document.getElementById('browser-window');
 
 browserUrlInput.value = "https://en.wikipedia.org";
 
+function closeBrowser() {
+    browserIframe.src = 'about:blank';
+    browserWindow.style.display = 'none';
+}
+
 function navigateBrowser(urlOrQuery) {
     let targetUrl = urlOrQuery.trim();
     if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {

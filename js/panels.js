@@ -11,6 +11,9 @@
         button.title = 'Close panel';
         button.addEventListener('click', () => {
             if (panel.id === 'twitch-window') closeTwitch();
+            else if (panel.id === 'youtube-window') closeYouTube();
+            else if (panel.id === 'media-window') closeMedia();
+            else if (panel.id === 'browser-window') closeBrowser();
             else if (panel.id === 'transit-window') closeTransit();
             else panel.style.display = 'none';
             document.getElementById('features-open-btn').focus();

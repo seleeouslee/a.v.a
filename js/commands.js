@@ -85,7 +85,7 @@ if (/^(?:close|hide)\s+youtube[.!]?$/i.test(commandText)) {
         commStatus.innerText = "BROWSER ACTIVE";
         return;
     } else if (command.includes("close browser") || command.includes("hide browser")) {
-        browserWindow.style.display = 'none';
+        closeBrowser();
         speak("Browser uplink closed.");
         commStatus.innerText = "BROWSER CLOSED";
         return;
@@ -126,7 +126,7 @@ if (/^(?:close|hide)\s+youtube[.!]?$/i.test(commandText)) {
             return;
         }
     } else if (command.includes("hide") || command.includes("close")) {
-        document.getElementById('media-window').style.display = 'none';
+        closeMedia();
         commStatus.innerText = "MEDIA UPLINK CLOSED.";
         speak("Closing visual uplink.");
         return;

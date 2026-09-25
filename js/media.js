@@ -1,6 +1,16 @@
 // Wikipedia image and Dailymotion video search.
 
+let mediaRequestId = 0;
+
+function closeMedia() {
+    // Invalidate pending searches so they cannot insert an autoplaying player later.
+    mediaRequestId++;
+    document.getElementById('media-video').textContent = 'AWAITING QUERY...';
+    document.getElementById('media-window').style.display = 'none';
+}
+
 async function fetchMedia(query) {
+    const requestId = ++mediaRequestId;
     const mediaWindow = document.getElementById('media-window');
     const imageGrid = document.getElementById('media-images');
     const videoSlot = document.getElementById('media-video');
@@ -12,6 +22,7 @@ async function fetchMedia(query) {
     try {
         const wikiRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&prop=pageimages&pithumbsize=400&format=json&origin=*`);
         const wikiData = await wikiRes.json();
+        if (requestId !== mediaRequestId) return;
 
         let imgHtml = '';
         if (wikiData.query && wikiData.query.pages) {
@@ -36,6 +47,7 @@ async function fetchMedia(query) {
         const dmRes = `https://api.dailymotion.com/videos?search=${encodeURIComponent(query)}&limit=1&fields=id,title`;
         const dmFetch = await fetch(dmRes);
         const dmData = await dmFetch.json();
+        if (requestId !== mediaRequestId) return;
 
         if (dmData.list && dmData.list.length > 0) {
             const videoId = dmData.list[0].id;
@@ -45,6 +57,7 @@ async function fetchMedia(query) {
         }
 
     } catch (err) {
+        if (requestId !== mediaRequestId) return;
         console.error(err);
         imageGrid.innerHTML = 'UPLINK ERROR. CONNECTION SEVERED.';
         videoSlot.innerHTML = 'UPLINK ERROR.';
