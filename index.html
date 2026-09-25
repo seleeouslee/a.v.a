@@ -16,12 +16,20 @@
     <button id="features-open-btn" class="action-btn" type="button" aria-haspopup="dialog" aria-controls="features-dialog">Explore features</button>
     <dialog id="features-dialog" aria-labelledby="features-title" aria-describedby="features-intro">
         <div class="features-heading">
-            <h2 id="features-title">What would you like to do?</h2>
-            <button id="features-close-btn" class="action-btn" type="button" aria-label="Close feature menu">Close</button>
+            <div>
+                <p class="features-eyebrow">A.V.A. // CONTROL CENTER</p>
+                <h2 id="features-title">Explore your features</h2>
+            </div>
+            <button id="features-close-btn" class="action-btn" type="button" aria-label="Close feature menu"><span aria-hidden="true">&times;</span> Close</button>
         </div>
         <p id="features-intro">Click a feature to open it. No voice commands needed.</p>
-        <div class="features-grid">
+        <h3 class="features-section-title">Conversation</h3>
+        <div class="features-grid features-conversation">
             <button class="feature-card" type="button" data-panel="comm-window" data-focus="manual-command-input"><strong>Ask A.V.A.</strong><span>Type a question or activate voice. AI answers need a configured model server.</span></button>
+            <button id="feature-repeat-btn" class="feature-card" type="button"><strong>Repeat last reply</strong><span>Hear A.V.A.'s most recent response again.</span></button>
+        </div>
+        <h3 class="features-section-title">Your workspace</h3>
+        <div class="features-grid">
             <button class="feature-card" type="button" data-panel="env-window"><strong>Weather &amp; clock</strong><span>See local weather, date, time, and clothing suggestions.</span></button>
             <button class="feature-card" type="button" data-panel="itinerary-window" data-focus="auth-notion-btn"><strong>Notion tasks</strong><span>View and sync your task database. Add your Notion credentials in Settings first.</span></button>
             <button class="feature-card" type="button" data-panel="browser-window" data-focus="browser-url-input"><strong>Browse the web</strong><span>Enter a website address or search Wikipedia. Some sites block embedded viewing.</span></button>
@@ -29,7 +37,6 @@
             <button class="feature-card" type="button" data-panel="twitch-window" data-focus="twitch-channel-input"><strong>Twitch</strong><span>Watch a channel and read live chat. Enter a channel, then press Play.</span></button>
             <button class="feature-card" type="button" data-panel="transit-window" data-focus="transit-route"><strong>STM bus &amp; metro</strong><span>Look up published bus departures and typical metro frequencies.</span></button>
             <button class="feature-card" type="button" data-panel="api-config" data-focus="theme-select"><strong>Settings</strong><span>Change your theme, location, AI model, Notion connection, and sleep mode.</span></button>
-            <button id="feature-repeat-btn" class="feature-card" type="button"><strong>Repeat last reply</strong><span>Hear A.V.A.'s most recent response again.</span></button>
         </div>
         <p class="features-tip">Arrange your workspace by dragging panel headers and resizing their bottom corners.</p>
     </dialog>
