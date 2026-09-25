@@ -51,8 +51,11 @@ saveKeyBtn.addEventListener('click', () => {
     localStorage.setItem('stark_llm_endpoint', LLM_ENDPOINT);
     localStorage.setItem('stark_llm_model', LLM_MODEL);
     if (LLM_API_KEY) localStorage.setItem('stark_llm_key', LLM_API_KEY);
+    else localStorage.removeItem('stark_llm_key');
     if (NOTION_SECRET) localStorage.setItem('stark_notion_secret', NOTION_SECRET);
+    else localStorage.removeItem('stark_notion_secret');
     if (NOTION_DB) localStorage.setItem('stark_notion_db', NOTION_DB);
+    else localStorage.removeItem('stark_notion_db');
 
     localStorage.setItem('stark_theme', selectedTheme);
     localStorage.setItem('stark_location', selectedLocation);

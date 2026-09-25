@@ -13,7 +13,6 @@
 
     <div class="hud-background"></div>
     <div class="shortcut-hint">CTRL + A + M to open settings</div>
-    <div id="version-tag">A.V.A. OS // v1.0.0 </div>
     <div id="version-tag">A.V.A. OS // v1.0.0</div>
     <div id="sleep-screen" aria-hidden="true"><canvas id="sleep-globe-canvas"></canvas></div>
 
@@ -52,18 +51,15 @@
 
             <hr class="separator">
 
-<label class="toggle-row"><input type="checkbox" id="sleep-mode-toggle" checked> Sleep mode &mdash; wireframe globe after 60s idle</label>
+            <label class="toggle-row"><input type="checkbox" id="sleep-mode-toggle" checked> Sleep mode after 150s idle</label>
 
-
-<button id="save-key-btn" class="action-btn">Save & Apply</button>
-    
             <button id="save-key-btn" class="action-btn">Save & Apply</button>
                 <!-- CHANGE THIS TO MAKE SURE WE ARE ON THE NEWEST BUILD? -->
             <div style="text-align: center; margin-top: 15px; font-size: 0.9rem; opacity: 0.5; letter-spacing: 2px;">
                 A.V.A. OS // v1.0.0                
+            </div>
         </div>
     </div>
-</div>
 
     <div id="env-window" class="window draggable">
         <div class="window-header">ENVIRONMENTAL DIAGNOSTICS</div>
@@ -169,8 +165,6 @@
             <button id="start-comm-btn" class="action-btn">ACTIVATE VOICE COMM</button>
         </div>
     </div>
-<canvas id="ai-brain-canvas"></canvas>
-    <div class="hud-background"></div>
    
     <!-- Classic scripts share feature helpers; keep this dependency order. -->
     <script src="./js/background.js"></script>
