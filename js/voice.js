@@ -88,6 +88,7 @@ function pickAvaVoice() {
 }
 
 function speak(text, callback) {
+    
     // Keep the last response available even when this browser has no speech output.
     recordAvaMemory(text);
     if (!window.speechSynthesis) {
@@ -124,46 +125,6 @@ function speak(text, callback) {
         }
         window.speechSynthesis.speak(utterance);
     });
-}
-
-    // Keep the last response available even when this browser has no speech output.
-    recordAvaMemory(text);
-    if (!window.speechSynthesis) {
-        if (callback) callback();
-        return;
-    }
-    const generation = ++speechGeneration;
-    replySpeaking = true;
-    window.speechSynthesis.cancel();
-    
-    if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-    }
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.1;
-
-    const voices = window.speechSynthesis.getVoices();
-    const femaleVoice = voices.find(v =>
-        v.name.includes('Google UK English Female') ||
-        v.name.includes('Samantha') ||
-        v.name.includes('Victoria') ||
-        v.name.includes('Zira') ||
-        (v.lang.startsWith('en') && v.name.toLowerCase().includes('female'))
-    );
-    if (femaleVoice) utterance.voice = femaleVoice;
-
-    const finishSpeaking = () => {
-        if (generation !== speechGeneration) return;
-        replySpeaking = false;
-        if (callback) callback();
-        startListening();
-    };
-    utterance.onend = finishSpeaking;
-    utterance.onerror = finishSpeaking;
-
-    window.speechSynthesis.speak(utterance);
 }
 
 // Voice picker (settings panel): list English voices, remember the choice.
