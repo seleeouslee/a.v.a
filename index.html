@@ -6,14 +6,18 @@
     <title>A.V.A - Advanced Virtual Assistant</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./css/styles.css?v=20260925-workspace">
 </head>
 <body>
     <canvas id="ai-brain-canvas"></canvas>
 
     <div class="hud-background"></div>
     <div class="shortcut-hint">CTRL + A + M to open settings</div>
-    <button id="features-open-btn" class="action-btn" type="button" aria-haspopup="dialog" aria-controls="features-dialog">Explore features</button>
+    <header class="workspace-header">
+        <div class="workspace-brand"><strong>A.V.A.</strong><span>YOUR PERSONAL WORKSPACE</span></div>
+        <button id="features-open-btn" class="action-btn" type="button" aria-haspopup="dialog" aria-controls="features-dialog">Explore features</button>
+    </header>
+    <div class="workspace-intro"><h1>Welcome back.</h1><p>Talk to A.V.A. or explore your tools to get started.</p></div>
     <dialog id="features-dialog" aria-labelledby="features-title" aria-describedby="features-intro">
         <div class="features-heading">
             <div>
@@ -35,6 +39,7 @@
             <button class="feature-card" type="button" data-panel="browser-window" data-focus="browser-url-input"><strong>Browse the web</strong><span>Enter a website address or search Wikipedia. Some sites block embedded viewing.</span></button>
             <button class="feature-card" type="button" data-panel="media-window" data-focus="media-search-input"><strong>Images &amp; videos</strong><span>Search Wikipedia images and Dailymotion videos by topic.</span></button>
             <button class="feature-card" type="button" data-panel="twitch-window" data-focus="twitch-channel-input"><strong>Twitch</strong><span>Watch a channel and read live chat. Enter a channel, then press Play.</span></button>
+            <button class="feature-card" type="button" data-panel="youtube-window" data-focus="youtube-input"><strong>YouTube</strong><span>Watch a video using a YouTube link, Shorts link, or video ID.</span></button>
             <button class="feature-card" type="button" data-panel="transit-window" data-focus="transit-route"><strong>STM bus &amp; metro</strong><span>Look up published bus departures and typical metro frequencies.</span></button>
             <button class="feature-card" type="button" data-panel="api-config" data-focus="theme-select"><strong>Settings</strong><span>Change your theme, location, AI model, Notion connection, and sleep mode.</span></button>
         </div>
@@ -217,7 +222,7 @@
     <!-- Classic scripts share feature helpers; keep this dependency order. -->
     <script src="./js/background.js"></script>
     <script src="./js/theme.js"></script>
-    <script src="./js/windows.js"></script>
+    <script src="./js/windows.js?v=20260925-workspace"></script>
     <script src="./js/clock.js"></script>
     <script src="./js/browser.js"></script>
     <script src="./js/weather.js"></script>
@@ -232,7 +237,7 @@
     <script src="./js/repeat.js"></script>
     <script src="./js/commands.js"></script>
     <script src="./js/voice.js"></script>
-    <script src="./js/features.js"></script>
+    <script src="./js/features.js?v=20260925-workspace"></script>
     <script src="./js/panels.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="./js/sleep.js"></script>

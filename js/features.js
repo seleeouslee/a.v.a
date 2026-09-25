@@ -18,7 +18,7 @@
         const rect = panel.getBoundingClientRect();
         panel.style.transform = 'none';
         panel.style.left = Math.max(0, Math.min(rect.left, window.innerWidth - rect.width)) + 'px';
-        panel.style.top = Math.max(0, Math.min(rect.top, window.innerHeight - rect.height)) + 'px';
+        panel.style.top = Math.max(96, Math.min(rect.top, window.innerHeight - rect.height)) + 'px';
         panel.style.right = 'auto';
         panel.style.bottom = 'auto';
         const focusTarget = focusId ? document.getElementById(focusId) : panel;

@@ -9,10 +9,6 @@ draggables.forEach(windowEl => {
     const header = windowEl.querySelector('.window-header');
     let isDragging = false, startX, startY, initialLeft, initialTop;
 
-    if (windowEl.id === 'comm-window') {
-        windowEl.style.left = (window.innerWidth / 2 - 170) + 'px';
-    }
-
     header.addEventListener('mousedown', (e) => {
         if (e.target.closest('button')) return;
         isDragging = true;
@@ -45,8 +41,8 @@ draggables.forEach(windowEl => {
         if (newX < SCREEN_SNAP) newX = 0;
         else if (newX + currentWidth > winWidth - SCREEN_SNAP) newX = winWidth - currentWidth;
 
-        if (newY < SCREEN_SNAP) newY = 0;
-        else if (newY + currentHeight > winHeight - SCREEN_SNAP) newY = winHeight - currentHeight;
+        if (newY < 96) newY = 96;
+        else if (newY + currentHeight > winHeight - SCREEN_SNAP) newY = Math.max(96, winHeight - currentHeight);
 
         draggables.forEach(otherEl => {
             if (otherEl === windowEl) return;

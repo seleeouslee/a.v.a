@@ -46,7 +46,7 @@ test('feature menu opens, closes, and launches every panel with focus and visibl
     assert.equal(dialog.open, true);
     elements.get('features-close-btn').click();
     assert.equal(dialog.open, false);
-    assert.equal(cards.length, 8);
+    assert.equal(cards.length, 9);
     let lastZ = 999;
     for (const card of cards) {
         launch.click();
