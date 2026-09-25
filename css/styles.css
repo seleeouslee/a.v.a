@@ -148,8 +148,9 @@ body, html {
 }
 
 .window-header {
+    position: relative;
     background: var(--hud-cyan-dim);
-    padding: 8px 15px;
+    padding: 12px 56px 12px 15px;
     font-weight: 700;
     letter-spacing: 2px;
     border-bottom: var(--hud-border);
@@ -162,6 +163,25 @@ body, html {
 .window-header:active {
     cursor: grabbing;
 }
+
+.panel-close-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--hud-cyan);
+    font: 1.5rem var(--font-main);
+    cursor: pointer;
+}
+.panel-close-btn:hover { background: var(--hud-cyan); color: #101214; }
+.panel-close-btn:focus-visible { outline: 2px solid var(--hud-cyan); outline-offset: -2px; }
 
 .window-content {
     padding: 15px;

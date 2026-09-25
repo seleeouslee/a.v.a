@@ -14,6 +14,7 @@ draggables.forEach(windowEl => {
     }
 
     header.addEventListener('mousedown', (e) => {
+        if (e.target.closest('button')) return;
         isDragging = true;
         windowEl.style.zIndex = ++highestZIndex;
 
