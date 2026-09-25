@@ -247,7 +247,7 @@ select option {
 #version-tag {
     position: fixed;
     bottom: 10px;
-    left: 10px;
+    right: 10px;
     font-size: 0.8rem;
     opacity: 0.3;
     z-index: 5;
