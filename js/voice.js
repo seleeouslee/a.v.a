@@ -166,9 +166,33 @@ function speak(text, callback) {
     window.speechSynthesis.speak(utterance);
 }
 
-if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = () => {};
+// Voice picker (settings panel): list English voices, remember the choice.
+function populateVoiceSelect() {
+    const select = document.getElementById('voice-select');
+    if (!select || !window.speechSynthesis) return;
+    const savedUri = localStorage.getItem('stark_tts_voice');
+    select.innerHTML = '';
+    getAvaVoices().filter(v => /^en/i.test(v.lang)).forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.voiceURI;
+        opt.textContent = `${v.name} (${v.lang})`;
+        if (v.voiceURI === savedUri) opt.selected = true;
+        select.appendChild(opt);
+    });
 }
+
+if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = populateVoiceSelect;
+    populateVoiceSelect();
+}
+
+document.getElementById('voice-select')?.addEventListener('change', (e) => {
+    localStorage.setItem('stark_tts_voice', e.target.value);
+});
+document.getElementById('voice-preview-btn')?.addEventListener('click', () => {
+    speak('Good morning, sir. All systems are now fully operational.');
+});
+
 
 if (SpeechRecognition) {
     recognition = new SpeechRecognition();
