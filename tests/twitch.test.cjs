@@ -45,6 +45,42 @@ test('typed wake word and browser alias load stream and chat for the Pages domai
     assert.equal(element('twitch-streams').hidden, false);
 });
 
+test('Enter and Send route typed Twitch commands without activating voice', async () => {
+    const { element, run } = setup();
+    element('manual-command-input').value = 'ava open twitch';
+    let prevented = false;
+    await element('manual-command-input').events.keydown({ key: 'Enter', preventDefault() { prevented = true; } });
+    assert.equal(prevented, true);
+    assert.equal(element('twitch-window').style.display, 'flex');
+    assert.equal(element('manual-command-input').value, '');
+    assert.match(element('comm-status').innerText, /Enter a Twitch channel/);
+    assert.equal(run('commActive'), false);
+
+    element('manual-command-input').value = 'AVA, open Twitch twitchdev.';
+    await element('send-command-btn').events.click();
+    assert.equal(new URL(element('twitch-player').src).searchParams.get('channel'), 'twitchdev');
+});
+
+test('speech recognition can open Twitch with trailing punctuation', () => {
+    const { element, run } = setup();
+    run(`recognition.onresult({resultIndex:0,results:[Object.assign([{transcript:'Ava, open Twitch.'}],{isFinal:true})]})`);
+    assert.equal(element('twitch-window').style.display, 'flex');
+    assert.match(element('comm-status').innerText, /Enter a Twitch channel/);
+});
+
+test('Enter ignores composition and held keys; routing errors are shown', async () => {
+    const { element, run } = setup();
+    const input = element('manual-command-input');
+    input.value = 'ava open twitch';
+    for (const flags of [{ isComposing: true }, { repeat: true }]) {
+        await input.events.keydown({ key: 'Enter', ...flags, preventDefault() { assert.fail('Should ignore this key'); } });
+        assert.equal(input.value, 'ava open twitch');
+    }
+    run('processAvaCommand = async () => { throw new Error("Test command failure"); }');
+    await element('send-command-btn').events.click();
+    assert.match(element('comm-status').innerText, /COMMAND FAILED/);
+});
+
 test('channel switching via form, positioning and close unload both embeds', async () => {
     const { element, run } = setup('http:', 'localhost');
     await run("processAvaCommand('open Twitch')");

@@ -15,7 +15,7 @@ async function processAvaCommand(text) {
     }
 
     // Handle Twitch before generic commands (channel names can contain "move" or "close").
-    const twitchCommand = commandText.match(/^(?:open|launch|watch)(?:\s+browser)?\s+twitch(?:\s+channel)?(?:\s+(.+))?$/i);
+    const twitchCommand = commandText.replace(/[.!?]+$/, '').match(/^(?:open|launch|watch)(?:\s+browser)?\s+twitch(?:\s+channel)?(?:\s+(.+))?$/i);
     if (twitchCommand) {
         const reply = openTwitch((twitchCommand[1] || '').replace(/[.!?]+$/, ''));
         commStatus.innerText = reply;

@@ -9,6 +9,35 @@ const manualCmdInput = document.getElementById('manual-command-input');
 let commActive = false;
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
+let recognitionRunning = false;
+let recognitionStarting = false;
+let replySpeaking = false;
+let speechGeneration = 0;
+let wakeUntil = 0;
+
+function startListening() {
+    if (!commActive || !recognition || recognitionRunning || recognitionStarting || replySpeaking) return;
+    recognitionStarting = true;
+    try {
+        recognition.start();
+    } catch (error) {
+        recognitionStarting = false;
+        if (error.name !== 'InvalidStateError') stopListening('MICROPHONE COULD NOT START. Check browser microphone permissions.');
+    }
+}
+
+function stopListening(status = 'STANDBY') {
+    commActive = false;
+    recognitionStarting = false;
+    wakeUntil = 0;
+    if (recognition) {
+        try { recognition.stop(); } catch (error) {}
+    }
+    commStatus.innerText = status;
+    commStatus.classList.remove('highlight');
+    startCommBtn.innerText = 'ACTIVATE VOICE COMM';
+    visualizer.classList.remove('active');
+}
 
 function speak(text, callback) {
     // Keep the last response available even when this browser has no speech output.
@@ -17,6 +46,8 @@ function speak(text, callback) {
         if (callback) callback();
         return;
     }
+    const generation = ++speechGeneration;
+    replySpeaking = true;
     window.speechSynthesis.cancel();
     
     if (recognition) {
@@ -37,14 +68,14 @@ function speak(text, callback) {
     );
     if (femaleVoice) utterance.voice = femaleVoice;
 
-    utterance.onend = () => {
+    const finishSpeaking = () => {
+        if (generation !== speechGeneration) return;
+        replySpeaking = false;
         if (callback) callback();
-        if (commActive && recognition) {
-            setTimeout(() => {
-                try { recognition.start(); } catch(e) {}
-            }, 400);
-        }
+        startListening();
     };
+    utterance.onend = finishSpeaking;
+    utterance.onerror = finishSpeaking;
 
     window.speechSynthesis.speak(utterance);
 }
@@ -60,6 +91,12 @@ if (SpeechRecognition) {
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
+        recognitionStarting = false;
+        recognitionRunning = true;
+        if (!commActive) {
+            try { recognition.stop(); } catch (error) {}
+            return;
+        }
         commStatus.innerText = "LISTENING (SAY 'AVA')...";
         commStatus.classList.add('highlight');
         visualizer.classList.add('active');
@@ -67,9 +104,10 @@ if (SpeechRecognition) {
 
     recognition.onresult = (event) => {
         let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-            transcript += event.results[i][0].transcript;
+        for (let i = 0; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript + ' ';
         }
+        transcript = transcript.trim();
         manualCmdInput.value = transcript;
         commStatus.innerText = `HEARING: "${transcript}"`;
 
@@ -77,36 +115,40 @@ if (SpeechRecognition) {
             const textLower = transcript.toLowerCase();
 
             // Accept AVA and EVA, including their dotted spellings, as whole wake words.
-            if (/\b(?:[ae]\.v\.a\.|[ae]va\b)/i.test(textLower)) {
-                let commandPart = transcript.replace(/\b(?:[ae]\.v\.a\.|[ae]va\b)[\s,:-]*/i, "").trim();
+            const wake = /\b(?:[ae]\.v\.a\.|[ae]va\b)[\s.,!?:-]*/i.exec(textLower);
+            if (wake || Date.now() < wakeUntil) {
+                const commandPart = wake ? transcript.slice(wake.index + wake[0].length).trim() : transcript;
 
                 if (commandPart.length > 0) {
-                    processAvaCommand(commandPart);
+                    wakeUntil = 0;
+                    submitAvaCommand(commandPart);
                 } else {
-                    speak("Online. What do you need?");
+                    // Let the user pause after the wake word without talking over them.
+                    wakeUntil = Date.now() + 8000;
                     commStatus.innerText = "ONLINE // AWAITING DIRECTIVE";
                 }
             } else {
-                commStatus.innerText = "IGNORED (SAY 'AVA')";
-                setTimeout(() => {
-                    if (commActive) commStatus.innerText = "LISTENING (SAY 'AVA')...";
-                }, 1500);
+                commStatus.innerText = `HEARD: "${transcript}" — SAY 'AVA' BEFORE YOUR COMMAND`;
             }
         }
     };
 
     recognition.onerror = (event) => {
+        const errors = {
+            'not-allowed': 'MICROPHONE BLOCKED. Allow microphone access in your browser, then activate voice again.',
+            'service-not-allowed': 'SPEECH SERVICE BLOCKED. Check browser permissions, then activate voice again.',
+            'audio-capture': 'NO MICROPHONE AVAILABLE. Check your microphone connection and browser input device.',
+            'network': 'SPEECH CONNECTION FAILED. Check your connection, then activate voice again.'
+        };
         if (event.error !== 'aborted' && event.error !== 'no-speech') {
-            commStatus.innerText = `COMM ERROR: ${event.error.toUpperCase()}`;
+            stopListening(errors[event.error] || `COMM ERROR: ${event.error.toUpperCase()}. Activate voice to retry.`);
         }
     };
 
     recognition.onend = () => {
-        if (commActive && !window.speechSynthesis.speaking) {
-            try {
-                recognition.start();
-            } catch(e) {}
-        }
+        recognitionRunning = false;
+        recognitionStarting = false;
+        startListening();
     };
 } else {
     commStatus.innerText = "SPEECH-TO-TEXT NOT SUPPORTED.";
@@ -121,27 +163,36 @@ startCommBtn.addEventListener('click', () => {
             commStatus.classList.add('highlight');
             visualizer.classList.add('active');
 
-            speak("Voice comm active.", () => {
-                try { recognition.start(); } catch(e) {}
-            });
+            // Request the microphone directly from the user's click; do not wait
+            // for a spoken greeting, which may never finish in some browsers.
+            startListening();
         } else {
             alert("Speech recognition is not supported in your browser.");
         }
     } else {
-        commActive = false;
-        if (recognition) {
-            try { recognition.stop(); } catch(e) {}
-        }
-        commStatus.innerText = "STANDBY";
-        commStatus.classList.remove('highlight');
-        startCommBtn.innerText = "ACTIVATE VOICE COMM";
-        visualizer.classList.remove('active');
+        stopListening();
     }
 });
 
-manualCmdInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && manualCmdInput.value.trim() !== "") {
-        processAvaCommand(manualCmdInput.value);
-        manualCmdInput.value = "";
+async function submitAvaCommand(text) {
+    try {
+        await processAvaCommand(text);
+    } catch (error) {
+        console.error('Command failed:', error);
+        commStatus.innerText = 'COMMAND FAILED. Please try again or reload A.V.A.';
     }
+}
+
+function sendManualCommand() {
+    const text = manualCmdInput.value.trim();
+    if (!text) return;
+    manualCmdInput.value = '';
+    return submitAvaCommand(text);
+}
+
+manualCmdInput.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || event.isComposing || event.repeat) return;
+    event.preventDefault();
+    return sendManualCommand();
 });
+document.getElementById('send-command-btn').addEventListener('click', sendManualCommand);
