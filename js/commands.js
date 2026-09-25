@@ -22,6 +22,21 @@ async function processAvaCommand(text) {
         speak(reply);
         return;
     }
+    // YouTube commands
+const ytOpen = commandText.match(/^(?:open|launch|play|watch)(?:\s+on)?\s+youtube(?:\s+(.+))?$/i);
+if (ytOpen) {
+    const reply = openYouTube((ytOpen[1] || '').replace(/[.!?]+$/, ''));
+    commStatus.innerText = reply.toUpperCase();
+    speak(reply);
+    return;
+}
+if (/^(?:close|hide)\s+youtube[.!]?$/i.test(commandText)) {
+    closeYouTube();
+    commStatus.innerText = 'YOUTUBE CLOSED';
+    speak('YouTube panel closed.');
+    return;
+}
+
     if (/^(?:close|hide)\s+twitch(?:\s+(?:panel|channel))?[.!]?$/i.test(commandText)) {
         closeTwitch();
         commStatus.innerText = 'TWITCH CLOSED';
@@ -34,6 +49,7 @@ async function processAvaCommand(text) {
         let targetWin = null;
         if (command.includes("stm") || command.includes("transit")) targetWin = document.getElementById('transit-window');
         else if (command.includes("twitch")) targetWin = document.getElementById('twitch-window');
+        else if (command.includes("youtube")) targetWin = document.getElementById('youtube-window');
         else if (command.includes("browser")) targetWin = document.getElementById('browser-window');
         else if (command.includes("media") || command.includes("recon")) targetWin = document.getElementById('media-window');
         else if (command.includes("env") || command.includes("weather") || command.includes("diagnostic")) targetWin = document.getElementById('env-window');
