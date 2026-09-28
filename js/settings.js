@@ -23,6 +23,7 @@ const llmModelInput = document.getElementById('llm-model-input');
 const apiKeyInput = document.getElementById('api-key-input');
 const notionSecretInput = document.getElementById('notion-secret-input');
 const notionDbInput = document.getElementById('notion-db-input');
+const brainUrlInput = document.getElementById('brain-url-input');
 const saveKeyBtn = document.getElementById('save-key-btn');
 const apiConfigWindow = document.getElementById('api-config');
 
@@ -31,12 +32,15 @@ let LLM_MODEL = localStorage.getItem('stark_llm_model') || 'llama3';
 let LLM_API_KEY = localStorage.getItem('stark_llm_key') || '';
 let NOTION_SECRET = localStorage.getItem('stark_notion_secret') || '';
 let NOTION_DB = localStorage.getItem('stark_notion_db') || '';
+let BRAIN_URL = localStorage.getItem('stark_brain_url') || '';
 
 llmEndpointInput.value = LLM_ENDPOINT;
 llmModelInput.value = LLM_MODEL;
 apiKeyInput.value = LLM_API_KEY;
 notionSecretInput.value = NOTION_SECRET;
 notionDbInput.value = NOTION_DB;
+brainUrlInput.value = BRAIN_URL;
+
 
 saveKeyBtn.addEventListener('click', () => {
     LLM_ENDPOINT = llmEndpointInput.value || 'http://localhost:11434/v1/chat/completions';
@@ -44,6 +48,8 @@ saveKeyBtn.addEventListener('click', () => {
     LLM_API_KEY = apiKeyInput.value;
     NOTION_SECRET = notionSecretInput.value;
     NOTION_DB = notionDbInput.value;
+    BRAIN_URL = brainUrlInput.value.trim();
+
 
     const selectedTheme = themeSelect.value;
     const selectedLocation = manualLocInput.value;
@@ -56,6 +62,9 @@ saveKeyBtn.addEventListener('click', () => {
     else localStorage.removeItem('stark_notion_secret');
     if (NOTION_DB) localStorage.setItem('stark_notion_db', NOTION_DB);
     else localStorage.removeItem('stark_notion_db');
+    if (BRAIN_URL) localStorage.setItem('stark_brain_url', BRAIN_URL);
+    else localStorage.removeItem('stark_brain_url');
+
 
     localStorage.setItem('stark_theme', selectedTheme);
     localStorage.setItem('stark_location', selectedLocation);
